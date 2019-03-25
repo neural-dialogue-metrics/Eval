@@ -32,6 +32,9 @@ class DistinctN(MetricMeta):
             n=self.n,
         )
 
+    def to_scalar(self, result):
+        return result
+
 
 class EmbeddingBased(MetricMeta):
     """
@@ -56,6 +59,9 @@ class EmbeddingBased(MetricMeta):
 
     def get_name(self):
         return self._name
+
+    def to_scalar(self, result: embedding_based.CorpusLevelScore):
+        return result.mean
 
 
 class AverageScore(EmbeddingBased):
@@ -116,6 +122,9 @@ class Rouge(MetricMeta):
         pairs = zip(kwargs[sig.RESPONSE_CORPUS], kwargs[sig.REFERENCE_CORPUS])
         values = list(map(self._metric_fn, pairs))
         return sum(values) / len(values)
+
+    def to_scalar(self, result: rouge.RougeScore):
+        return result.f1_measure
 
 
 class RougeN(Rouge):
@@ -188,3 +197,6 @@ class BleuScore(MetricMeta):
 
     def get_name(self):
         return 'BLEU-%d' % self.max_order
+
+    def to_scalar(self, result: bleu_metrics.BleuScore):
+        return result.bleu

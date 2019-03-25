@@ -17,3 +17,12 @@ class MetricMeta(abc.ABC):
 
     def __call__(self, *args, **kwargs):
         raise NotImplementedError
+
+    def __repr__(self):
+        return '<Metric %s>' % self.get_name()
+
+    def __str__(self):
+        return self.get_name()
+
+    def to_scalar(self, result):
+        raise NotImplementedError
