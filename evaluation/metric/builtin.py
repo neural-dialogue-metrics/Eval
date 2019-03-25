@@ -109,22 +109,28 @@ class Rouge(MetricMeta):
         sig.REFERENCE_CORPUS,
     )
 
-    def __init__(self, metric_fn, alpha, **kwargs):
-        self._metric_fn = lambda summary, reference: metric_fn(
+    def _apply_metric_fn(self, summary, reference):
+        rouge_score = self._metric_fn(
             summary_sentence=summary,
             reference_sentence=reference,
-            alpha=alpha,
-            **kwargs,
+            alpha=self.alpha,
+            **self._kwargs,
         )
+        return rouge_score.f1_measure
+
+    def __init__(self, metric_fn, alpha, **kwargs):
+        self._metric_fn = metric_fn
+        self.alpha = alpha
+        self._kwargs = kwargs
 
     def __call__(self, **kwargs):
         # Run on each pair and then average the result.
         pairs = zip(kwargs[sig.RESPONSE_CORPUS], kwargs[sig.REFERENCE_CORPUS])
-        values = list(map(self._metric_fn, pairs))
+        values = [self._apply_metric_fn(s, r) for s, r in pairs]
         return sum(values) / len(values)
 
-    def to_scalar(self, result: rouge.RougeScore):
-        return result.f1_measure
+    def to_scalar(self, result):
+        return result
 
 
 class RougeN(Rouge):

@@ -23,14 +23,20 @@ def _schedule_metrics(metrics):
     Then assuming the metrics from the same class will cost nearly the same amount of time,
     group them into a list and try to run them in parallel.
 
-    :param metrics:
-    :return:
+    >>> from evaluation.metric.builtin import *
+    >>> metrics = [RougeN(1), RougeN(2), BleuScore(3, smooth=False), AverageScore(), DistinctN(3)]
+    >>> metrics = _schedule_metrics(metrics)
+    >>> [(cls.__name__, ', '.join(map(str, m))) for cls, m in metrics]
+    [('DistinctN', 'Distinct-3'), ('RougeN', 'ROUGE-1, ROUGE-2'), ('BleuScore', 'BLEU-3'), ('AverageScore', 'average')]
+
+    :param metrics: a list of Metrics.
+    :return: List[Tuple[type, list]].
     """
     _metrics = collections.defaultdict(list)
     # Bleu-2 and Bleu-3 will be in one group but ROUGE-2 and ROUGE-N won't be in one group.
     # This is just a hint.
     for m in metrics:
-        _metrics[type(m)] = m
+        _metrics[type(m)].append(m)
     return sorted(_metrics.items(), key=lambda ms: len(ms[1][0].signature))
 
 
@@ -82,16 +88,19 @@ class Estimator:
         :param kwargs: loaded signature.
         :return: a list of result values.
         """
+        if len(metrics) == 1:
+            return [metrics[0](**kwargs)]
+
         results = []
-        for metric in metrics:
-            _logger.info('apply metric %s...', metric)
-            future = self._pool.apply_async(func=metrics, kwds=kwargs)
+        for _metric in metrics:
+            _logger.info('apply metric %s...', _metric)
+            future = self._pool.apply_async(func=_metric, kwds=kwargs)
             results.append(future)
         _results = []
-        for metric, future in zip(metrics, results):
-            _logger.info('waiting for metric %s', metrics)
+        for _metric, future in zip(metrics, results):
+            _logger.info('waiting for metric %s', _metric)
             r = future.get()
-            _logger.info('done. metric %s: %r', metric, r)
+            _logger.info('done. metric %s: %r', _metric, r)
             _results.append(r)
         return _results
 
