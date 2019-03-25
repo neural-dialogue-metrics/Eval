@@ -5,6 +5,7 @@ import evaluation.metric.builtin as m
 
 ROUGE_N_MAX = 4
 BLEU_N_MAX = 4
+DISTINCT_N_MAX = 2
 
 
 def _make_metrics():
@@ -19,6 +20,8 @@ def _make_metrics():
         metrics.append(m.RougeN(n))
     for n in range(1, BLEU_N_MAX + 1):
         metrics.append(m.BleuScore(max_order=n, smooth=False))
+    for n in range(1, DISTINCT_N_MAX + 1):
+        metrics.append(m.DistinctN(n))
     return metrics
 
 

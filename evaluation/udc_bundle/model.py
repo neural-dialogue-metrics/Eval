@@ -10,7 +10,7 @@ from evaluation.udc_bundle import KNOWN_MODELS
 
 import logging
 
-_logger = logging.getLogger(__file__)
+_logger = logging.getLogger(__name__)
 
 
 class ModelInfo(collections.namedtuple('ModelInfo', ['name', 'responses', 'first_response'])):

@@ -37,7 +37,14 @@ def _schedule_metrics(metrics):
     # This is just a hint.
     for m in metrics:
         _metrics[type(m)].append(m)
-    return sorted(_metrics.items(), key=lambda ms: len(ms[1][0].signature))
+    return sorted(_metrics.items(), key=lambda ms: len(ms[0].signature))
+
+
+def _log_metric_schedule(metrics):
+    _logger.info('Metric Schedule:')
+    for cls, _metrics in metrics:
+        _logger.info('%s: %s', cls.__name__, ', '.join(map(str, _metrics)))
+    _logger.info('Metric Schedule End')
 
 
 class Estimator:
@@ -78,6 +85,7 @@ class Estimator:
         :param signature:
         :return:
         """
+        _logger.info('loading signature...')
         return {key: self._loader.load(key, model.first_response_path) for key in signature}
 
     def _run_metric_group(self, metrics, **kwargs):
@@ -89,7 +97,11 @@ class Estimator:
         :return: a list of result values.
         """
         if len(metrics) == 1:
-            return [metrics[0](**kwargs)]
+            _metric = metrics[0]
+            _logger.info('apply metric %s...', _metric)
+            r = _metric(**kwargs)
+            _logger.info('done. metric %s: %r', _metric, r)
+            return [r]
 
         results = []
         for _metric in metrics:
@@ -115,7 +127,7 @@ class Estimator:
         """
         for metric, result in zip(metrics, results):
             filename = self._out_dir / _MODEL_METRIC_FILE % dict(model=model, metric=metric)
-            _logger.info('writing to %s', filename)
+            _logger.info('saving result to %s', filename)
             with open(filename, 'w') as f:
                 print(metric.to_scalar(result), file=f)
             self._results.append((model, metric, filename))
@@ -130,14 +142,20 @@ class Estimator:
                 print(metric, model, _DATASET, value, sep=',', file=f)
 
     def run(self):
+        _logger.info('number of models: %d', len(self._models))
+        _logger.info('number of metrics: %d', len(self._metrics))
+        _logger.info('number of combinations: %d', len(self._models) * len(self._metrics))
+
         _logger.info('scheduling metrics...')
         self._metrics = _schedule_metrics(self._metrics)
+        _log_metric_schedule(self._metrics)
 
         for model in self._models:
+            _logger.info('Evaluating Model %s', model)
+
             for metric_class, metric_group in self._metrics:
-                _logger.info('loading signature...')
-                kwargs = self._load_signature(metric_class.signature, model)
                 _logger.info('evaluating %s on %s...', metric_class.__name__, model)
+                kwargs = self._load_signature(metric_class.signature, model)
                 results = self._run_metric_group(metric_group, **kwargs)
                 if not self._dry_run:
                     self._dump_result(model, metric_group, results)
