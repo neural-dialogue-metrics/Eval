@@ -7,6 +7,8 @@ ROUGE_N_MAX = 4
 BLEU_N_MAX = 4
 DISTINCT_N_MAX = 2
 
+DRY_RUN = False
+
 
 def _make_metrics():
     metrics = [
@@ -26,7 +28,7 @@ def _make_metrics():
 
 
 if __name__ == '__main__':
-    estimator = Estimator(Loader.create_for_udc(), dry_run=True)
+    estimator = Estimator(Loader.create_for_udc(), dry_run=DRY_RUN)
     for metric in _make_metrics():
         estimator.add_metric(metric)
 

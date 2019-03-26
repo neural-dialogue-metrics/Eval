@@ -126,7 +126,8 @@ class Estimator:
         :return:
         """
         for metric, result in zip(metrics, results):
-            filename = self._out_dir / _MODEL_METRIC_FILE % dict(model=model, metric=metric)
+            basename = _MODEL_METRIC_FILE % dict(model=model, metric=metric)
+            filename = self._out_dir / basename
             _logger.info('saving result to %s', filename)
             with open(filename, 'w') as f:
                 print(metric.to_scalar(result), file=f)

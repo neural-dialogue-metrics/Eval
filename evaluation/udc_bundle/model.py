@@ -82,8 +82,3 @@ def discover_models():
     for d in model_dirs:
         _logger.info('Found model_dir: %s', d)
     return list(map(_make_model, model_dirs))
-
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
-    discover_models()
