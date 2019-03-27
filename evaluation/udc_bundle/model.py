@@ -14,6 +14,10 @@ _logger = logging.getLogger(__name__)
 
 
 class ModelInfo(collections.namedtuple('ModelInfo', ['name', 'responses', 'first_response'])):
+    """
+    Capture model name and where to find its response files.
+    """
+
     @property
     def root_dir(self):
         return pathlib.Path(MODEL_ROOT) / self.name
@@ -26,14 +30,6 @@ class ModelInfo(collections.namedtuple('ModelInfo', ['name', 'responses', 'first
     def first_response_path(self):
         return self.root_dir / self.first_response
 
-    @property
-    def responses_key(self):
-        return '%s-%s' % (self.name, self.responses)
-
-    @property
-    def first_response_key(self):
-        return '%s-%s' % (self.name, self.first_response)
-
     def __str__(self):
         return self.name
 
@@ -44,6 +40,7 @@ class ModelInfo(collections.namedtuple('ModelInfo', ['name', 'responses', 'first
 def _make_model(model_dir: pathlib.Path):
     """
     Create a ModelInfo from a model_dir.
+    The last component of the dir is used as the model name.
 
     :param model_dir:
     :return:
@@ -54,7 +51,6 @@ def _make_model(model_dir: pathlib.Path):
     assert len(txt_files) == 2
 
     for txt in txt_files:
-        _logger.info('Found model responses file: %s', txt)
         if txt.name.endswith(FIRST_RESPONSE_SUFFIX):
             first_response = txt.name
         else:
