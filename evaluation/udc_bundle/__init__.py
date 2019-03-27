@@ -1,5 +1,5 @@
 """
-This run file runs our existing metrics on the context-response pairs bundled
+This package runs our existing metrics on the context-response pairs bundled
 with the Ubuntu Dialogue Corpus.
 
 Our metrics are:
@@ -42,3 +42,6 @@ KNOWN_MODELS = (
     'LSTM_Baseline',
     'VHRED',
 )
+
+# The filename of the summary file.
+SUMMARY_FILE = 'summary.csv'

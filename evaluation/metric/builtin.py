@@ -71,7 +71,7 @@ class AverageScore(EmbeddingBased):
 
     def __init__(self):
         super().__init__(
-            name='average',
+            name='Embedding-Average',
             metric_fn=embedding_based.average_corpus_level,
         )
 
@@ -83,7 +83,7 @@ class GreedyMatchingScore(EmbeddingBased):
 
     def __init__(self):
         super().__init__(
-            name='greedy-matching',
+            name='Greedy-Matching',
             metric_fn=embedding_based.greedy_match_corpus_level,
         )
 
@@ -95,7 +95,7 @@ class ExtremaScore(EmbeddingBased):
 
     def __init__(self):
         super().__init__(
-            name='extrema',
+            name='Vector-Extrema',
             metric_fn=embedding_based.extrema_corpus_level,
         )
 

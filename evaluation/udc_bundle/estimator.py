@@ -8,11 +8,11 @@ import tempfile
 import multiprocessing
 
 from evaluation.udc_bundle.model import ModelInfo
+from evaluation.udc_bundle import SUMMARY_FILE
 
 _logger = logging.getLogger(__name__)
 
 _MODEL_METRIC_FILE = '%(model)s-%(metric)s.txt'
-_SUMMARY_FILE = 'summary.csv'
 _CSV_HEADER = 'Metric,Model,Dataset,Value'
 _DATASET = 'UDC'
 
@@ -163,4 +163,4 @@ class Estimator:
 
         _logger.info('all evaluation done')
         if not self._dry_run:
-            self._write_summary(self._out_dir / _SUMMARY_FILE)
+            self._write_summary(self._out_dir / SUMMARY_FILE)
