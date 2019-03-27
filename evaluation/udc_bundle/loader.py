@@ -2,7 +2,7 @@
 This module handles loading various data from the disk.
 """
 from evaluation.metric.metric_meta import Signature as sig
-from evaluation.udc_bundle import EMBEDDING_PATH, REFERENCE_CORPUS_PATH
+import evaluation.udc_bundle as udc
 from embedding_based import load_corpus_from_file
 from embedding_based import load_word2vec_binary
 
@@ -25,6 +25,14 @@ class Loader:
         }
 
     def load(self, resource, response_path: pathlib.Path = None):
+        """
+        Load a given resource.
+
+        :param resource: a key in the Signature.
+        :param response_path: if resource is RESPONSE_CORPUS, this is the path
+        to the corpus.
+        :return: the required resource.
+        """
         if resource == sig.EMBEDDINGS:
             return self._load_embeddings()
         if resource == sig.REFERENCE_CORPUS:
@@ -35,6 +43,11 @@ class Loader:
         return self._load_response(response_path)
 
     def _load_embeddings(self):
+        """
+        Load the word2vec binary embeddings (mostly for EmbeddingBased).
+
+        :return:
+        """
         eb = self._resources.get(sig.EMBEDDINGS, None)
         if eb:
             return eb
@@ -43,6 +56,11 @@ class Loader:
         return self._resources.setdefault(sig.EMBEDDINGS, eb)
 
     def _load_reference(self):
+        """
+        Load the reference corpus.
+
+        :return:
+        """
         ref = self._resources.get(sig.REFERENCE_CORPUS, None)
         if ref is not None:
             return ref
@@ -51,6 +69,11 @@ class Loader:
         return self._resources.setdefault(sig.REFERENCE_CORPUS, ref)
 
     def _load_response(self, response_path):
+        """
+        Load the response corpus.
+
+        :return:
+        """
         res = self._resources[sig.RESPONSE_CORPUS].get(response_path, None)
         if res is not None:
             return res
@@ -60,7 +83,12 @@ class Loader:
 
     @classmethod
     def create_for_udc(cls):
+        """
+        Create a Loader to load UDC-specific files.
+
+        :return: Loader
+        """
         return cls(
-            embeddings_path=EMBEDDING_PATH,
-            reference_path=REFERENCE_CORPUS_PATH,
+            embeddings_path=udc.EMBEDDING_PATH,
+            reference_path=udc.REFERENCE_CORPUS_PATH,
         )

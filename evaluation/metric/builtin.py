@@ -1,5 +1,11 @@
 """
-Builtin Metric class.
+Builtin Metric class. These are wrappers around the library functions.
+
+Note that each class is a subclass of MetricMeta and declares a signature attribute.
+Then in the instance's __call__(), the signature is used to access the parameters in the
+kwargs. It is the system that ensures the claimed signature keys are present in the kwargs.
+But it is the Metric that ensures the kwargs is used properly i.e., pass the corresponding args
+to the underlying functions.
 """
 from evaluation.metric.metric_meta import MetricMeta
 from evaluation.metric.metric_meta import Signature as sig

@@ -20,6 +20,8 @@ Our metrics are:
     - Distinct-N
         * Distinct-1
         * Distinct-2
+
+This module defines some common constants for other parts.
 """
 import pathlib
 
