@@ -7,8 +7,8 @@ kwargs. It is the system that ensures the claimed signature keys are present in 
 But it is the Metric that ensures the kwargs is used properly i.e., pass the corresponding args
 to the underlying functions.
 """
-from evaluation.metric.metric_meta import MetricMeta
-from evaluation.metric.metric_meta import Signature as sig
+from eval.metric_meta import MetricMeta
+from eval.metric_meta import Signature as sig
 
 # Import all builtin metrics.
 import distinct_n

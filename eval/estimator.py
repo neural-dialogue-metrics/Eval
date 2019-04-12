@@ -7,8 +7,6 @@ import pathlib
 import tempfile
 import multiprocessing
 
-from evaluation.udc_bundle.model import ModelInfo
-from evaluation.udc_bundle import SUMMARY_FILE
 
 _logger = logging.getLogger(__name__)
 
@@ -30,7 +28,7 @@ def _schedule_metrics(metrics):
     NB: the classes of the same super class is not considered, i.e., AverageScore and ExtremaScore
     won't be in the same group.
 
-    >>> from evaluation.metric.builtin import *
+    >>> from eval.metric.builtin import *
     >>> metrics = [RougeN(1), RougeN(2), BleuScore(3, smooth=False), AverageScore(), DistinctN(3)]
     >>> metrics = _schedule_metrics(metrics)
     >>> [(cls.__name__, ', '.join(map(str, m))) for cls, m in metrics]
@@ -61,8 +59,8 @@ def _log_metric_schedule(metrics):
 
 class Estimator(object):
     """
-    This class controls the whole process of evaluation.
-    The evaluation runs in a grid fashion -- the row lists the metrics and the column lists the models.
+    This class controls the whole process of eval.
+    The eval runs in a grid fashion -- the row lists the metrics and the column lists the models.
     It runs in row-major -- all metrics for a model is run, and then for the next model.
     This can be cache-friendly since files of a model is accessed consecutively and only in one period.
     """
@@ -109,7 +107,7 @@ class Estimator(object):
         _logger.info('added model %s', model)
         self._models.append(model)
 
-    def _load_signature(self, signature, model: ModelInfo):
+    def _load_signature(self, signature, model):
         """
         Load signature for a metric.
 
@@ -182,7 +180,7 @@ class Estimator(object):
 
     def run(self):
         """
-        Run the grid evaluation.
+        Run the grid eval.
 
         :return:
         """
@@ -204,7 +202,7 @@ class Estimator(object):
                 results = self._run_metric_group(metric_group, **kwargs)
                 if not self._dry_run:
                     self._dump_result(model, metric_group, results)
-        _logger.info('all evaluation done')
+        _logger.info('all eval done')
 
         if not self._dry_run:
             self._write_summary(self._out_dir / SUMMARY_FILE)

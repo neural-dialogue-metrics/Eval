@@ -1,8 +1,7 @@
 """
 This module handles loading various data from the disk.
 """
-from evaluation.metric.metric_meta import Signature as sig
-import evaluation.udc_bundle as udc
+from eval.metric_meta import Signature as sig
 from embedding_based import load_corpus_from_file
 from embedding_based import load_word2vec_binary
 
@@ -80,15 +79,3 @@ class Loader:
         _logger.info('loading response %s', response_path)
         res = load_corpus_from_file(response_path)
         return self._resources[sig.RESPONSE_CORPUS].setdefault(response_path, res)
-
-    @classmethod
-    def create_for_udc(cls):
-        """
-        Create a Loader to load UDC-specific files.
-
-        :return: Loader
-        """
-        return cls(
-            embeddings_path=udc.EMBEDDING_PATH,
-            reference_path=udc.REFERENCE_CORPUS_PATH,
-        )
