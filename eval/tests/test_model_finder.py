@@ -12,6 +12,8 @@ class TestFindSerbanModels(unittest.TestCase):
         for m in models:
             output: ModelOutput = m.output
             self.assertTrue(output.response_path.is_file())
+            
+            # NBest is optional.
             if output.nbest_path:
                 self.assertTrue(output.nbest_path.is_file())
 

@@ -28,6 +28,9 @@ class ModelOutput:
             print('nbest:', self.nbest_path, file=f)
             return f.getvalue()
 
+    def __repr__(self):
+        return '<ModelOutput %s>' % self.response_path
+
 
 class ModelInfo:
     """
@@ -42,11 +45,17 @@ class ModelInfo:
     def __str__(self):
         return '%s-%s' % (self.name, self.dataset)
 
+    def __repr__(self):
+        return '<Model %s trained on %s>' % (self.name, self.dataset)
+
 
 class ModelFinder(abc.ABC):
+    """
+    An ABC that can find a collection of models.
+    """
     def find_models(self):
         """
-        Return an iterable of ModelOutput.
+        Return an iterable of ModelInfo.
 
         :return:
         """

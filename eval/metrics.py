@@ -7,21 +7,78 @@ kwargs. It is the system that ensures the claimed signature keys are present in 
 But it is the Metric that ensures the kwargs is used properly i.e., pass the corresponding args
 to the underlying functions.
 """
-from eval.metric_meta import MetricMeta
-from eval.metric_meta import Signature as sig
 
 # Import all builtin metrics.
 import distinct_n
 import embedding_based
 import rouge
-import bleu.metrics as bleu_metrics
+import bleu
+
+import abc
+
+REFERENCE_CORPUS = 'reference_corpus'
+RESPONSE_CORPUS = 'response_corpus'
+EMBEDDINGS = 'embeddings'
 
 
-class DistinctN(MetricMeta):
+class MetricValue:
+    def __init__(self, name, value):
+        """
+        >>> MetricValue('BLEU', 0.04)
+        <BLEU: 0.0400>
+
+        :param name:
+        :param value:
+        """
+        self.name = name
+        self.value = value
+
+    def __str__(self):
+        return '%s: %.4f' % (self.name, self.value)
+
+    def __repr__(self):
+        return '<Metric %s>' % self
+
+
+class MetricAdapter(abc.ABC):
+    def get_name(self):
+        """
+        Return the canonical name.
+
+        :return: str.
+        """
+        raise NotImplementedError
+
+    @property
+    def signature(self):
+        """
+        This is a class attribute that tells the system how to invoke the metric.
+
+        :return:
+        """
+        raise NotImplementedError
+
+    def __call__(self, **kwargs):
+        """
+        Calling a metric compute the score given kwargs described in signature.
+
+        :param kwargs: A dict with keys in Signature.
+        :return:
+        """
+        raise NotImplementedError
+
+    def __repr__(self):
+        return '<Metric %s>' % self.get_name()
+
+    def __str__(self):
+        return self.get_name()
+
+
+class DistinctN(MetricAdapter):
     """
     Wrapper for Distinct-N metric.
     """
-    signature = (sig.RESPONSE_CORPUS,)
+    signature = (RESPONSE_CORPUS,)
 
     def __init__(self, n):
         """
@@ -33,23 +90,21 @@ class DistinctN(MetricMeta):
         return 'Distinct-%d' % self.n
 
     def __call__(self, **kwargs):
-        return distinct_n.distinct_n_corpus_level(
-            sentences=kwargs[sig.RESPONSE_CORPUS],
+        score = distinct_n.distinct_n_corpus_level(
+            sentences=kwargs[RESPONSE_CORPUS],
             n=self.n,
         )
-
-    def to_scalar(self, result):
-        return result
+        return MetricValue(self.get_name(), score)
 
 
-class EmbeddingBased(MetricMeta):
+class EmbeddingBased(MetricAdapter):
     """
     Base class for embedding-based metrics.
     """
     signature = (
-        sig.RESPONSE_CORPUS,
-        sig.REFERENCE_CORPUS,
-        sig.EMBEDDINGS,
+        RESPONSE_CORPUS,
+        REFERENCE_CORPUS,
+        EMBEDDINGS,
     )
 
     def __init__(self, name, metric_fn):
@@ -57,17 +112,15 @@ class EmbeddingBased(MetricMeta):
         self._metric_fn = metric_fn
 
     def __call__(self, **kwargs):
-        return self._metric_fn(
-            hypothesis_corpus=kwargs[sig.RESPONSE_CORPUS],
-            reference_corpus=kwargs[sig.REFERENCE_CORPUS],
-            embeddings=kwargs[sig.EMBEDDINGS],
+        score = self._metric_fn(
+            hypothesis_corpus=kwargs[RESPONSE_CORPUS],
+            reference_corpus=kwargs[REFERENCE_CORPUS],
+            embeddings=kwargs[EMBEDDINGS],
         )
+        return MetricValue(self._name, score.mean)
 
     def get_name(self):
         return self._name
-
-    def to_scalar(self, result: embedding_based.CorpusLevelScore):
-        return result.mean
 
 
 class AverageScore(EmbeddingBased):
@@ -106,13 +159,13 @@ class ExtremaScore(EmbeddingBased):
         )
 
 
-class Rouge(MetricMeta):
+class Rouge(MetricAdapter):
     """
     Base class for ROUGE metrics.
     """
     signature = (
-        sig.RESPONSE_CORPUS,
-        sig.REFERENCE_CORPUS,
+        RESPONSE_CORPUS,
+        REFERENCE_CORPUS,
     )
 
     def _apply_metric_fn(self, summary, reference):
@@ -131,12 +184,11 @@ class Rouge(MetricMeta):
 
     def __call__(self, **kwargs):
         # Run on each pair and then average the result.
-        pairs = zip(kwargs[sig.RESPONSE_CORPUS], kwargs[sig.REFERENCE_CORPUS])
+        pairs = zip(kwargs[RESPONSE_CORPUS], kwargs[REFERENCE_CORPUS])
         values = [self._apply_metric_fn(s, r) for s, r in pairs]
-        return sum(values) / len(values)
-
-    def to_scalar(self, result):
-        return result
+        score = sum(values) / len(values)
+        name = self.get_name()
+        return MetricValue(name, score)
 
 
 class RougeN(Rouge):
@@ -186,13 +238,13 @@ class RougeW(Rouge):
         return 'ROUGE-W'
 
 
-class BleuScore(MetricMeta):
+class BleuScore(MetricAdapter):
     """
     Wrapper for the BLEU metric.
     """
     signature = (
-        sig.REFERENCE_CORPUS,
-        sig.RESPONSE_CORPUS,
+        REFERENCE_CORPUS,
+        RESPONSE_CORPUS,
     )
 
     def __init__(self, max_order, smooth):
@@ -200,9 +252,9 @@ class BleuScore(MetricMeta):
         self.smooth = smooth
 
     def __call__(self, **kwargs):
-        return bleu_metrics.compute_bleu(
-            translation_corpus=kwargs[sig.RESPONSE_CORPUS],
-            reference_corpus=kwargs[sig.REFERENCE_CORPUS],
+        return bleu.compute_bleu(
+            translation_corpus=kwargs[RESPONSE_CORPUS],
+            reference_corpus=kwargs[REFERENCE_CORPUS],
             max_order=self.max_order,
             smooth=self.smooth,
         )
@@ -210,5 +262,5 @@ class BleuScore(MetricMeta):
     def get_name(self):
         return 'BLEU-%d' % self.max_order
 
-    def to_scalar(self, result: bleu_metrics.BleuScore):
+    def to_scalar(self, result: bleu.BleuScore):
         return result.bleu
