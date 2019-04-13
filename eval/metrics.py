@@ -58,12 +58,20 @@ class MetricAdapter(abc.ABC):
         """
         raise NotImplementedError
 
+    @property
+    def family(self):
+        """
+        Family of this metric.
+        :return:
+        """
+        raise NotImplementedError
+
     def __call__(self, **kwargs):
         """
         Calling a metric compute the score given kwargs described in signature.
 
         :param kwargs: A dict with keys in Signature.
-        :return:
+        :return: a MetricValue or a list of MetricValue.
         """
         raise NotImplementedError
 
@@ -79,6 +87,7 @@ class DistinctN(MetricAdapter):
     Wrapper for Distinct-N metric.
     """
     signature = (RESPONSE_CORPUS,)
+    family = 'Distinct-N'
 
     def __init__(self, n):
         """
@@ -106,6 +115,8 @@ class EmbeddingBased(MetricAdapter):
         REFERENCE_CORPUS,
         EMBEDDINGS,
     )
+
+    family = 'EmbeddingBased'
 
     def __init__(self, name, metric_fn):
         self._name = name
@@ -167,6 +178,7 @@ class Rouge(MetricAdapter):
         RESPONSE_CORPUS,
         REFERENCE_CORPUS,
     )
+    family = 'ROUGE'
 
     def _apply_metric_fn(self, summary, reference):
         rouge_score = self._metric_fn(
@@ -195,6 +207,7 @@ class RougeN(Rouge):
     """
     Wrapper for the ROUGE-N.
     """
+    family = 'ROUGE-N'
 
     def __init__(self, n, alpha=None):
         super().__init__(
@@ -246,21 +259,20 @@ class BleuScore(MetricAdapter):
         REFERENCE_CORPUS,
         RESPONSE_CORPUS,
     )
+    family = 'BLEU'
 
     def __init__(self, max_order, smooth):
         self.max_order = max_order
         self.smooth = smooth
 
     def __call__(self, **kwargs):
-        return bleu.compute_bleu(
+        value = bleu.bleu_corpus_level(
             translation_corpus=kwargs[RESPONSE_CORPUS],
             reference_corpus=kwargs[REFERENCE_CORPUS],
             max_order=self.max_order,
             smooth=self.smooth,
         )
+        return MetricValue(self.get_name(), value)
 
     def get_name(self):
         return 'BLEU-%d' % self.max_order
-
-    def to_scalar(self, result: bleu.BleuScore):
-        return result.bleu

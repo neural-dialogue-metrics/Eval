@@ -51,13 +51,6 @@ SUMMARY_FILE = 'summary.csv'
 METRICS = [
 
 ]
-"""
-Driver & Config script to conduct the experiment described in config.py.
-"""
-from eval.estimator import Estimator
-from eval.loader import Loader
-from eval.model import discover_models
-import eval.metrics as m
 
 # Run all variants with N <= MAX.
 ROUGE_N_MAX = 4

@@ -1,9 +1,9 @@
 """
 This module handles loading various data from the disk.
 """
-from eval.metric_meta import Signature as sig
 from embedding_based import load_corpus_from_file
 from embedding_based import load_word2vec_binary
+from eval.metrics import REFERENCE_CORPUS, RESPONSE_CORPUS, EMBEDDINGS
 
 import pathlib
 import logging
@@ -20,7 +20,7 @@ class Loader:
         self.embeddings_path = embeddings_path
         self.reference_path = reference_path
         self._resources = {
-            sig.RESPONSE_CORPUS: {}
+            RESPONSE_CORPUS: {}
         }
 
     def load(self, resource, response_path: pathlib.Path = None):
@@ -32,12 +32,12 @@ class Loader:
         to the corpus.
         :return: the required resource.
         """
-        if resource == sig.EMBEDDINGS:
+        if resource == EMBEDDINGS:
             return self._load_embeddings()
-        if resource == sig.REFERENCE_CORPUS:
+        if resource == REFERENCE_CORPUS:
             return self._load_reference()
 
-        assert resource == sig.RESPONSE_CORPUS
+        assert resource == RESPONSE_CORPUS
         assert response_path.is_file()
         return self._load_response(response_path)
 
@@ -47,12 +47,12 @@ class Loader:
 
         :return:
         """
-        eb = self._resources.get(sig.EMBEDDINGS, None)
+        eb = self._resources.get(EMBEDDINGS, None)
         if eb:
             return eb
         _logger.info('loading embeddings %s', self.embeddings_path)
         eb = load_word2vec_binary(self.embeddings_path)
-        return self._resources.setdefault(sig.EMBEDDINGS, eb)
+        return self._resources.setdefault(EMBEDDINGS, eb)
 
     def _load_reference(self):
         """
@@ -60,12 +60,12 @@ class Loader:
 
         :return:
         """
-        ref = self._resources.get(sig.REFERENCE_CORPUS, None)
+        ref = self._resources.get(REFERENCE_CORPUS, None)
         if ref is not None:
             return ref
         _logger.info('loading reference %s', self.reference_path)
         ref = load_corpus_from_file(self.reference_path)
-        return self._resources.setdefault(sig.REFERENCE_CORPUS, ref)
+        return self._resources.setdefault(REFERENCE_CORPUS, ref)
 
     def _load_response(self, response_path):
         """
@@ -73,9 +73,9 @@ class Loader:
 
         :return:
         """
-        res = self._resources[sig.RESPONSE_CORPUS].get(response_path, None)
+        res = self._resources[RESPONSE_CORPUS].get(response_path, None)
         if res is not None:
             return res
         _logger.info('loading response %s', response_path)
         res = load_corpus_from_file(response_path)
-        return self._resources[sig.RESPONSE_CORPUS].setdefault(response_path, res)
+        return self._resources[RESPONSE_CORPUS].setdefault(response_path, res)

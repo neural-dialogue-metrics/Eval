@@ -7,17 +7,13 @@ import pathlib
 import tempfile
 import multiprocessing
 
-
 _logger = logging.getLogger(__name__)
 
 # The filename format for saving a metric score to file for later loading.
-_MODEL_METRIC_FILE = '%(model)s-%(metric)s.txt'
+_MODEL_METRIC_FILE = '%(model)s-%(metric)s-%(dataset)s.txt'
 
 # The header of the summary csv file.
 _CSV_HEADER = 'Metric,Model,Dataset,Value'
-
-# The value for the Dataset column. In our case, it is all UDC.
-_DATASET = 'UDC'
 
 
 def _schedule_metrics(metrics):
@@ -28,18 +24,12 @@ def _schedule_metrics(metrics):
     NB: the classes of the same super class is not considered, i.e., AverageScore and ExtremaScore
     won't be in the same group.
 
-    >>> from eval.metric.builtin import *
-    >>> metrics = [RougeN(1), RougeN(2), BleuScore(3, smooth=False), AverageScore(), DistinctN(3)]
-    >>> metrics = _schedule_metrics(metrics)
-    >>> [(cls.__name__, ', '.join(map(str, m))) for cls, m in metrics]
-    [('DistinctN', 'Distinct-3'), ('RougeN', 'ROUGE-1, ROUGE-2'), ('BleuScore', 'BLEU-3'), ('AverageScore', 'average')]
-
     :param metrics: a list of Metrics.
     :return: List[Tuple[type, list]].
     """
     _metrics = collections.defaultdict(list)
     for m in metrics:
-        _metrics[type(m)].append(m)
+        _metrics[m.family].append(m)
     # Assuming signature is a class attribute.
     return sorted(_metrics.items(), key=lambda ms: len(ms[0].signature))
 
@@ -52,8 +42,8 @@ def _log_metric_schedule(metrics):
     :return:
     """
     _logger.info('Metric Schedule:')
-    for cls, _metrics in metrics:
-        _logger.info('%s: %s', cls.__name__, ', '.join(map(str, _metrics)))
+    for family, _metrics in metrics:
+        _logger.info('%s: %s', family, ', '.join(map(str, _metrics)))
     _logger.info('Metric Schedule End')
 
 
@@ -65,47 +55,26 @@ class Estimator(object):
     This can be cache-friendly since files of a model is accessed consecutively and only in one period.
     """
 
-    def __init__(self, loader, dry_run=False):
+    def __init__(self, loader, config, dry_run=False):
         """
         :param loader: a Loader object that can load a resource given a key in the Signature.
         See Loader.load().
         :param dry_run: bool. Don't create any file when true.
         """
-        self._dry_run = dry_run
-        # a list of ModelInfo.
-        self._models = []
-        # a list of Metric.
-        self._metrics = []
+        self._config = config
         # a list of 3-tuples: (model, metric, filename), where filename save the result.
         self._results = []
         # loader loads and keeps the resource.
         self._loader = loader
         # run the metrics of the same class in parallel.
         self._pool = multiprocessing.Pool(processes=2)
-        if not self._dry_run:
+        if not self._config.dry_run:
             # save output files (maybe a ton of number!) in the dir.
             self._out_dir = pathlib.Path(tempfile.mkdtemp())
             _logger.info('our_dir: %s', self._out_dir)
 
-    def add_metric(self, metric):
-        """
-        Add a metric to the grid.
-
-        :param metric: a Metric instance.
-        :return:
-        """
-        _logger.info('added metric %s', metric)
-        self._metrics.append(metric)
-
-    def add_model(self, model):
-        """
-        Add a metric to the grid.
-
-        :param model: a ModelInfo instance.
-        :return:
-        """
-        _logger.info('added model %s', model)
-        self._models.append(model)
+    def __getattr__(self, item):
+        return self._config[item]
 
     def _load_signature(self, signature, model):
         """
@@ -155,7 +124,7 @@ class Estimator(object):
         :return:
         """
         for metric, result in zip(metrics, results):
-            basename = _MODEL_METRIC_FILE % dict(model=model, metric=metric)
+            basename = _MODEL_METRIC_FILE % dict(model=model, metric=metric, dataset=model.dataset)
             filename = self._out_dir / basename
             _logger.info('saving result to %s', filename)
             with open(filename, 'w') as f:
@@ -176,7 +145,7 @@ class Estimator(object):
                 with open(result_file) as rf:  # load the value from file.
                     value = rf.read().strip()
                 # Be careful of the order!
-                print(metric, model, _DATASET, value, sep=',', file=f)
+                print(metric, model, model.dataset, value, sep=',', file=f)
 
     def run(self):
         """
@@ -196,13 +165,13 @@ class Estimator(object):
         for model in self._models:
             _logger.info('Evaluating Model %s', model)
 
-            for metric_class, metric_group in self._metrics:
-                _logger.info('evaluating %s on %s...', metric_class.__name__, model)
-                kwargs = self._load_signature(metric_class.signature, model)
+            for family, metric_group in self._metrics:
+                _logger.info('evaluating %s on %s...', family, model)
+                kwargs = self._load_signature(family.signature, model)
                 results = self._run_metric_group(metric_group, **kwargs)
                 if not self._dry_run:
                     self._dump_result(model, metric_group, results)
         _logger.info('all eval done')
 
         if not self._dry_run:
-            self._write_summary(self._out_dir / SUMMARY_FILE)
+            self._write_summary(self._out_dir / self._config.output_file)

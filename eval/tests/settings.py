@@ -1,0 +1,3 @@
+MODELS = ['HRED']
+
+METRICS = ['BLEU']
