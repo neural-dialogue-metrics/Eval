@@ -1,26 +1,9 @@
 import os
 from pathlib import Path
 
-UBUNTU_CONTEXT = '/home/cgsdfc/UbuntuDialogueCorpus/ResponseContextPairs/raw_testing_contexts.txt'
 UBUNTU_REF = '/home/cgsdfc/UbuntuDialogueCorpus/ResponseContextPairs/raw_testing_responses.txt'
 
-OPENSUB_CTX = '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/test.context.txt'
-OPENSUB_REF = '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/test.response.txt'
-
 GOOGLE_NEWS_300_BIN = '/home/cgsdfc/embeddings/word2vec/GoogleNews_negative300/GoogleNews-vectors-negative300.bin'
-
-
-def data_path(response, context=None, reference=None):
-    parts = os.path.split(response)
-    assert parts[-1].endswith('.txt'), 'path not pointing to valid output.txt'
-    dataset, model = parts[-3:-1]
-    return {
-        'dataset': dataset.lower(),
-        'model': model.lower(),
-        'response': response,
-        'context': context,
-        'reference': reference,
-    }
 
 
 def ruber_data(train_dir, data_dir, embedding):
@@ -39,8 +22,19 @@ def ruber_data(train_dir, data_dir, embedding):
     }
 
 
+def data_path(response):
+    parts = os.path.split(response)
+    assert parts[-1].endswith('.txt'), 'path not pointing to valid output.txt'
+    dataset, model = parts[-3:-1]
+    return {
+        'dataset': dataset.lower(),
+        'model': model.lower(),
+        'output': response,
+    }
+
+
 config = {
-    'under_test': [
+    'models': [
         data_path('/home/cgsdfc/Result/HRED-VHRED/Ubuntu/VHRED/output.txt'),
         data_path('/home/cgsdfc/Result/HRED-VHRED/Ubuntu/LSTM/output.txt'),
         data_path('/home/cgsdfc/Result/HRED-VHRED/Ubuntu/HRED/output.txt'),
@@ -51,12 +45,12 @@ config = {
     ],
     'dataset': {
         'ubuntu': {
-            'context': UBUNTU_CONTEXT,
+            'context': '/home/cgsdfc/UbuntuDialogueCorpus/ResponseContextPairs/raw_testing_contexts.txt',
             'reference': UBUNTU_REF,
         },
-        'opensub': {
-            'context': OPENSUB_CTX,
-            'reference': OPENSUB_REF,
+        'opensub3_6': {
+            'context': '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/test.context.txt',
+            'reference': '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/test.response.txt',
         }
     },
     'metrics': {
@@ -65,10 +59,10 @@ config = {
             'smoothing': False,
         },
         'rouge': {
-            'alpha': 'default',
-            'rouge_n': [4],
-            'rouge_l': True,
-            'rouge_w': True,
+            'alpha': 0.9,
+            'weight': 1.2,
+            'n': [2],
+            'variants': ['rouge_n', 'rouge_l', 'rouge_w'],
         },
         'distinct_n': {
             'n': [1, 2]
@@ -94,7 +88,7 @@ config = {
             )
         },
         'lsdscc': {
-            'variants': ['max_bleu', 'mds', 'pds']
+            'fields': ['max_bleu', 'mds', 'pds']
         }
     }
 }
