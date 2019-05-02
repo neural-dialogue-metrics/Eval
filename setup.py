@@ -3,7 +3,7 @@ from setuptools import setup
 __version__ = '0.0.1'
 
 setup(
-    name='Eval',
+    name='EvalHelper',
     version=__version__,
     description='Evaluation Helper',
     author='cgsdfc',
@@ -14,7 +14,9 @@ setup(
         'computational linguistics',
         'machine translation',
     ],
-    scripts=[''],
+    packages=[
+        'eval',
+    ],
     classifiers=[
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: ',
