@@ -1,37 +1,6 @@
-import os
-from pathlib import Path
-
-UBUNTU_REF = '/home/cgsdfc/UbuntuDialogueCorpus/ResponseContextPairs/raw_testing_responses.txt'
+from eval.utils import data_path, ruber_data
 
 GOOGLE_NEWS_300_BIN = '/home/cgsdfc/embeddings/word2vec/GoogleNews_negative300/GoogleNews-vectors-negative300.bin'
-
-
-def ruber_data(train_dir, data_dir, embedding):
-    data_dir = Path(data_dir)
-    query_vocab = data_dir.glob('*_contexts.*.vocab*')
-    query_embed = data_dir.glob('*_contexts.*.embed')
-    reply_vocab = data_dir.glob('*_responses.*.vocab*')
-    reply_embed = data_dir.glob('*_responses.*.embed')
-    return {
-        'train_dir': train_dir,
-        'query_vocab': query_vocab,
-        'query_embed': query_embed,
-        'reply_vocab': reply_vocab,
-        'reply_embed': reply_embed,
-        'embedding': embedding,
-    }
-
-
-def data_path(response):
-    parts = os.path.split(response)
-    assert parts[-1].endswith('.txt'), 'path not pointing to valid output.txt'
-    dataset, model = parts[-3:-1]
-    return {
-        'dataset': dataset.lower(),
-        'model': model.lower(),
-        'output': response,
-    }
-
 
 config = {
     'models': [
@@ -46,9 +15,9 @@ config = {
     'dataset': {
         'ubuntu': {
             'context': '/home/cgsdfc/UbuntuDialogueCorpus/ResponseContextPairs/raw_testing_contexts.txt',
-            'reference': UBUNTU_REF,
+            'reference': '/home/cgsdfc/UbuntuDialogueCorpus/ResponseContextPairs/raw_testing_responses.txt',
         },
-        'opensub3_6': {
+        'opensub': {
             'context': '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/test.context.txt',
             'reference': '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/test.response.txt',
         }
@@ -57,6 +26,7 @@ config = {
         'bleu': {
             'n': [4],
             'smoothing': False,
+            'filter': []
         },
         'rouge': {
             'alpha': 0.9,
@@ -73,10 +43,7 @@ config = {
                 'vector_extrema',
                 'greedy_matching',
             ],
-            'embeddings': {
-                'file': GOOGLE_NEWS_300_BIN,
-                'format': ['binary', 'word2vec'],
-            }
+            'embeddings': GOOGLE_NEWS_300_BIN,
         },
         'adem': True,
         'ruber': {

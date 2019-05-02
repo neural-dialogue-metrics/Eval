@@ -1,23 +1,14 @@
 from nltk.translate.bleu_score import sentence_bleu, corpus_bleu, SmoothingFunction
+from distinct_n import distinct_n_sentence_level
+
 import embedding_based as eb
 import lsdscc
 import rouge
-from distinct_n import distinct_n_sentence_level
-
-import numpy as np
-import logging
 import json
-import itertools
 
-logger = logging.getLogger(__name__)
+from eval.consts import *
 
 metrics_classes = {}
-
-CONTEXTS = 'contexts'
-RESPONSES = 'responses'
-REFERENCES = 'references'
-LIST_OF_REFERENCES = 'list_of_references'
-EMBEDDINGS = 'embeddings'
 
 
 def register_metric(cls):
@@ -44,8 +35,10 @@ class Score:
 class MetricWrapper:
     requires = None
     init_requires = None
+
     name = None
-    fields = None
+    field = None
+    variant = None
     params = None
 
     def __call__(self, *args, **kwargs):
@@ -91,12 +84,15 @@ class EmbeddingBasedScore(MetricWrapper):
         'greedy_matching': (eb.greedy_match_sentence_level, eb.greedy_match_corpus_level)
     }
 
-    def __init__(self, variant, sentence_level, corpus_level):
+    def __init__(self, variant, embeddings_file, sentence_level, corpus_level):
         self.variant = variant
+        self.embeddings_file = embeddings_file
         self.sentence_level = sentence_level
         self.corpus_level = corpus_level
 
-    def __call__(self, responses, references, embeddings):
+    def __call__(self, responses, references, embeddings=None):
+        if embeddings is None:
+            embeddings = self.load_embeddings(self.embeddings_file)
         utterance = [
             self.sentence_level(hypo, ref, embeddings) for hypo, ref in zip(responses, references)
         ]
@@ -104,15 +100,18 @@ class EmbeddingBasedScore(MetricWrapper):
         return utterance, system
 
     @classmethod
-    def new(cls, variant):
+    def new(cls, variant, embeddings_file):
         args = cls.variants[variant]
-        return cls(variant, *args)
+        return cls(variant, embeddings_file, *args)
 
     @classmethod
     def parse_config(cls, config):
-        variants = config['variants']
-        for v in variants:
-            yield cls.new(v)
+        for v in config['variants']:
+            yield cls.new(v, config['embeddings'])
+
+    @classmethod
+    def load_embeddings(cls, filename):
+        return eb.load_word2vec_binary(filename)
 
 
 @register_metric
@@ -176,9 +175,6 @@ class DistinctScore(MetricWrapper):
 
 class LSDSCCScore(MetricWrapper):
     name = 'lsdscc'
-    HYPOTHESIS_SETS = 'hypothesis_sets'
-    REFERENCE_SETS = 'reference_sets'
-
     valid_fields = ('max_bleu', 'mds', 'pds')
     requires = (HYPOTHESIS_SETS, REFERENCE_SETS)
 
@@ -204,18 +200,13 @@ class LSDSCCScore(MetricWrapper):
         return lsdscc.HypothesisSet.load_corpus(filename)
 
     @classmethod
-    def load_reference_sets(cls, filename):
+    def load_reference_sets(cls):
         return lsdscc.ReferenceSet.load_json_corpus()
 
 
 @register_metric
 class ADEMScore(MetricWrapper):
     name = 'adem'
-    ADEM_MODEL = 'adem_model'
-    RAW_CONTEXTS = 'raw_contexts'
-    RAW_RESPONSES = 'raw_responses'
-    RAW_REFERENCES = 'raw_references'
-
     requires = (RAW_CONTEXTS, RAW_RESPONSES, RAW_REFERENCES, ADEM_MODEL)
     init_requires = (ADEM_MODEL,)
 
@@ -230,120 +221,9 @@ class ADEMScore(MetricWrapper):
         )
         return utterance
 
-    @staticmethod
-    def load(filename):
-        with open(filename) as f:
-            return f.readlines()
-
 
 class RuberScore(MetricWrapper):
     name = 'ruber'
 
     def __init__(self):
         pass
-
-
-resource_info = {
-    CONTEXTS: {
-        'from': 'dataset',
-        'loader': '',
-        '': ''
-    },
-    RESPONSES: {
-        'from': 'model',
-        'loader': '',
-    },
-    REFERENCES: {
-        'from': 'dataset',
-        'loader': '',
-    }
-}
-
-
-def register_loader(fn):
-    pass
-
-
-class ConfigParser:
-
-    def __init__(self):
-        pass
-
-    def parse_metrics(self, config):
-        metrics = []
-        for name, metric_config in config.items():
-            cls = metrics_classes[name]
-            metrics.extend(cls.parse_config(metric_config))
-        return metrics
-
-    def parse_dataset(self, config):
-        dataset = []
-        for name, value in config.items():
-            dataset.append(Dataset(name, value['context'], value['reference']))
-        return dataset
-
-    def parse_models(self, config):
-        models = []
-        for data_path in config:
-            models.append(Model(data_path['name'], data_path['dataset'], data_path['output']))
-        return models
-
-    def parse_config(self, config):
-        metrics = self.parse_metrics(config['metrics'])
-        models = self.parse_models(config['models'])
-        datasets = self.parse_models(config['datasets'])
-
-        ds_names = set(ds.name for ds in datasets)
-        for model in models:
-            if model.trained_on not in ds_names:
-                raise ValueError('model {} trained on unknown dataset {}'.format(model.name, model.trained_on))
-
-        return [
-            (metric, model, dataset)
-            for metric, model, dataset in itertools.product(metrics, models, datasets)
-            if model.trained_on == dataset.name
-        ]
-
-
-class Model:
-    provides = (RESPONSES,)
-
-    def __init__(self, name, trained_on, responses):
-        self.name = name
-        self.trained_on = trained_on
-        self.responses = responses
-
-
-class Dataset:
-    provides = (CONTEXTS, REFERENCES)
-
-    def __init__(self, name, contexts, references):
-        self.name = name
-        self.contexts = contexts
-        self.references = references
-
-    @classmethod
-    def load_contexts(cls, contexts):
-        pass
-
-
-class UnderTest:
-    def __init__(self, metric, model, dataset):
-        assert model.trained_on == dataset
-        self.metric = metric
-        self.model = model
-        self.dataset = dataset
-        self.location = {}
-
-    def resolve(self, key):
-        if key in self.location:
-            return self.location[key]
-        # first see if it is in dataset or model.
-        model_or_ds = (self.model, self.dataset)
-        for thing in model_or_ds:
-            if key in thing.provides:
-                file = getattr(thing, key)
-                loader = getattr(thing, 'load_' + key)
-                return self.location.setdefault(key, (file, loader))
-        # try metrics
-        if hasattr(self.metric, key):
