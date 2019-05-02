@@ -19,12 +19,12 @@ def ruber_data(train_dir, data_dir, embedding):
 
 
 def data_path(response):
-    parts = os.path.split(response)
+    parts = Path(response).parts
     assert parts[-1].endswith('.txt'), 'path not pointing to valid output.txt'
     dataset, model = parts[-3:-1]
     return {
         'dataset': dataset.lower(),
-        'model': model.lower(),
+        'name': model.lower(),
         'output': response,
     }
 

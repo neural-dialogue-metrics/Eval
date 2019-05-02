@@ -9,7 +9,6 @@ models = [
     data_path('/home/cgsdfc/Result/HRED-VHRED/Ubuntu/VHRED/output.txt'),
     data_path('/home/cgsdfc/Result/HRED-VHRED/Ubuntu/LSTM/output.txt'),
     data_path('/home/cgsdfc/Result/HRED-VHRED/Ubuntu/HRED/output.txt'),
-
     data_path('/home/cgsdfc/Result/HRED-VHRED/Opensub/HRED/output.txt'),
     data_path('/home/cgsdfc/Result/HRED-VHRED/Opensub/LSTM/output.txt'),
     data_path('/home/cgsdfc/Result/HRED-VHRED/Opensub/VHRED/output.txt'),

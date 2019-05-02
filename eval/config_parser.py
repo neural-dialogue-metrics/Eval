@@ -1,14 +1,14 @@
 import itertools
-from eval.metrics import metrics_classes
+#from eval.metrics import metrics_classes
 from eval.utils import Model, Dataset
 
 
-def parse_metrics(config):
-    metrics = []
-    for name, metric_config in config.items():
-        cls = metrics_classes[name]
-        metrics.extend(cls.parse_config(metric_config))
-    return metrics
+# def parse_metrics(config):
+#     metrics = []
+#     for name, metric_config in config.items():
+#         cls = metrics_classes[name]
+#         metrics.extend(cls.parse_config(metric_config))
+#     return metrics
 
 
 def parse_dataset(config):
@@ -25,18 +25,18 @@ def parse_models(config):
     return models
 
 
-def parse_config(config):
-    metrics = parse_metrics(config['metrics'])
-    models_and_datasets = parse_models_and_datasets(config)
-    return [
-        (metric, model, dataset)
-        for metric, (model, dataset) in itertools.product(metrics, models_and_datasets)
-    ]
+# def parse_config(config):
+#     metrics = parse_metrics(config['metrics'])
+#     models_and_datasets = parse_models_and_datasets(config)
+#     return [
+#         (metric, model, dataset)
+#         for metric, (model, dataset) in itertools.product(metrics, models_and_datasets)
+#     ]
 
 
 def parse_models_and_datasets(config):
     models = parse_models(config['models'])
-    datasets = parse_models(config['datasets'])
+    datasets = parse_dataset(config['datasets'])
 
     ds_names = set(ds.name for ds in datasets)
     for model in models:
