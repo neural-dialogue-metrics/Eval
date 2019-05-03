@@ -1,5 +1,6 @@
 import itertools
 import logging
+import pprint
 
 from eval.config_parser import parse_models_and_datasets, parse_metrics
 from eval.exporter import Exporter
@@ -31,8 +32,17 @@ class Engine:
         ]
 
     def run(self):
+        logger.info('save_dir: %s', self.exporter.save_dir)
+        logger.info('config: %s', pprint.pformat(self.config))
+
         self.exporter.export_config(self.config)
         for under_test in self.under_tests:
+            logger.info('Model: %s, Dataset: %s, Metric: %s', under_test.model_name,
+                        under_test.dataset_name, under_test.metric_name)
+            logger.info('Loading resources: %s', ', '.join(under_test.metric.requires))
             payload = {key: self.loader.load(key, under_test) for key in under_test.metric.requires}
+
+            logger.info('Calculating scores...')
             result = under_test.metric(**payload)
+
             self.exporter.export_json(result, under_test)

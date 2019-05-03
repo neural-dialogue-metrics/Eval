@@ -1,7 +1,11 @@
 import numbers
+import logging
 from pathlib import Path
 import numpy as np
+
 import json
+
+logger = logging.getLogger(__name__)
 
 
 class Exporter:
@@ -53,6 +57,8 @@ class Exporter:
         result = self.process_result(under_test.metric, result)
         prefix = under_test.prefix
         output_path = self.save_dir.joinpath(prefix).with_suffix('.json')
+
+        logger.info('Saving scores to %s', output_path)
         with output_path.open('w') as f:
             json.dump(result, f, default=self.default)
 
