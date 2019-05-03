@@ -17,3 +17,6 @@ ADEM_MODEL = 'adem_model'
 RAW_CONTEXTS = 'raw_contexts'
 RAW_RESPONSES = 'raw_responses'
 RAW_REFERENCES = 'raw_references'
+
+# default embeddings for EB.
+GOOGLE_NEWS_300_BIN = '/home/cgsdfc/embeddings/word2vec/GoogleNews_negative300/GoogleNews-vectors-negative300.bin'

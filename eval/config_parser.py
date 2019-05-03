@@ -1,26 +1,64 @@
 import itertools
-from eval.utils import Model, Dataset
+
+from pathlib import Path
+
+import json
+
+from eval.utils import Model, Dataset, model_path
+from eval.consts import CONTEXTS, REFERENCES, RESPONSES
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-def parse_metrics(config, metrics_classes):
+def parse_metrics(config):
+    try:
+        from eval.metrics import metrics_classes
+    except ImportError:
+        logger.error('metric_classes not available. Some of the packages were not installed?')
+        raise
+
     metrics = []
-    for name, metric_config in config.items():
-        cls = metrics_classes[name]
-        metrics.extend(cls.parse_config(metric_config))
+    if isinstance(config, list):
+        for m in config:
+            if isinstance(m, dict):
+                name = m['name']
+                cls = metrics_classes[name]
+                metrics.extend(cls.parse_config(m))
+            else:
+                # assume to be MetricWrapper
+                metrics.append(m)
+    elif isinstance(config, dict):
+        for name, metric_config in config.items():
+            cls = metrics_classes[name]
+            metrics.extend(cls.parse_config(metric_config))
+    else:
+        raise TypeError('metric config must be a list or a dict')
     return metrics
 
 
 def parse_dataset(config):
+    if isinstance(config, list):
+        if not all(isinstance(ds, Dataset) for ds in config):
+            raise TypeError('if dataset config is a list, it must contain only Dataset')
+        return config
     dataset = []
     for name, value in config.items():
-        dataset.append(Dataset(name, value['context'], value['reference']))
+        dataset.append(Dataset(name=name,
+                               contexts=value[CONTEXTS], references=value[REFERENCES]))
     return dataset
 
 
 def parse_models(config):
     models = []
     for data_path in config:
-        models.append(Model(data_path['name'], data_path['dataset'], data_path['output']))
+        if isinstance(data_path, Model):
+            model = data_path
+        elif isinstance(data_path, str):
+            model = model_path(data_path)
+        else:
+            raise TypeError('model config must be a list of str or Model')
+        models.append(model)
     return models
 
 
@@ -37,6 +75,19 @@ def parse_models_and_datasets(config):
         (model, dataset) for model, dataset in itertools.product(models, datasets)
         if model.trained_on == dataset.name
     ]
+
+
+def load_config(filename):
+    filename = Path(filename)
+    if filename.suffix == '.json':
+        config = json.load(filename.open())
+    elif filename.suffix == '.py':
+        globals = {}
+        exec(filename.read_text(), globals)
+        config = globals['config']
+    else:
+        raise ValueError('invalid file type for config file: {}'.format(filename))
+    return config
 
 
 class BasicPayload:

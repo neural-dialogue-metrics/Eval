@@ -108,8 +108,9 @@ class EmbeddingBasedScore(MetricWrapper):
 
     @classmethod
     def parse_config(cls, config):
+        embeddings = config.get('embeddings', GOOGLE_NEWS_300_BIN)
         for v in config['variants']:
-            yield cls.new(v, config['embeddings'])
+            yield cls.new(v, embeddings)
 
 
 @register_metric

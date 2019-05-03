@@ -15,16 +15,11 @@ class Engine:
         self.exporter = Exporter(save_dir)
         self.loader = ResourceLoader()
         self.config = config
-        try:
-            from eval.metrics import metrics_classes
-            self.metrics_classes = metrics_classes
-        except ImportError:
-            logger.error('metric_classes not available. Some of the packages were not installed?')
-            raise
+
         self.under_tests = self.parse_config(config)
 
     def parse_config(self, config):
-        metrics = parse_metrics(config['metrics'], self.metrics_classes)
+        metrics = parse_metrics(config['metrics'])
         models_and_datasets = parse_models_and_datasets(config)
         return [
             UnderTest(metric=metric, model=model, dataset=dataset)
