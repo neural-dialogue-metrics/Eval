@@ -4,12 +4,15 @@ config = {
     'metrics': {
         'embedding_based': {
             'variants': [
-                'greedy_matching'
+                'greedy_matching',
+                'vector_extrema',
+                'vector_average',
             ]
         }
     },
     'models': [
-        get_model('hred', 'ubuntu'),
+        get_model('vhred', 'ubuntu'),
+        get_model('lstm', 'ubuntu'),
     ],
     'datasets': [
         get_dataset('ubuntu'),
