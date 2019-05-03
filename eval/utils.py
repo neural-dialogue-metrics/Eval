@@ -41,3 +41,45 @@ class Dataset:
         self.name = name
         self.contexts = contexts
         self.references = references
+
+
+class UnderTest:
+    SEPARATOR = '-'
+
+    def __init__(self, metric, model, dataset):
+        assert model.trained_on == dataset
+        self.metric = metric
+        self.model = model
+        self.dataset = dataset
+
+    @property
+    def model_name(self):
+        return self.model.name
+
+    @property
+    def dataset_name(self):
+        return self.dataset.name
+
+    @property
+    def metric_name(self):
+        return self.metric.fullname
+
+    @property
+    def prefix(self):
+        return self.SEPARATOR.join((self.model_name, self.dataset_name, self.metric_name))
+
+    @property
+    def contexts(self):
+        return self.dataset.contexts
+
+    @property
+    def references(self):
+        return self.dataset.references
+
+    @property
+    def responses(self):
+        return self.model.responses
+
+    @property
+    def embeddings(self):
+        return getattr(self.metric, 'embeddings_file')
