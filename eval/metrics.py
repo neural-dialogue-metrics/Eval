@@ -1,10 +1,8 @@
 from nltk.translate.bleu_score import sentence_bleu, corpus_bleu, SmoothingFunction
-from distinct_n import distinct_n_sentence_level
 
 import embedding_based as eb
-import lsdscc
 import rouge
-
+from distinct_n import distinct_n_sentence_level
 from eval.consts import *
 
 metrics_classes = {}
@@ -167,61 +165,3 @@ class DistinctScore(MetricWrapper):
     def parse_config(cls, config):
         for n in config['n']:
             yield cls(n)
-
-
-@register_metric
-class LSDSCCScore(MetricWrapper):
-    name = 'lsdscc'
-    valid_fields = ('max_bleu', 'mds', 'pds')
-    requires = (HYPOTHESIS_SETS, REFERENCE_SETS)
-
-    def __init__(self, fields):
-        self.fields = fields
-
-    def __call__(self, hypothesis_sets, reference_sets):
-        utterance = [
-            lsdscc.compute_score_on_hypothesis_set(h, r)
-            for h, r in zip(hypothesis_sets, reference_sets)
-        ]
-        return utterance, None
-
-    @classmethod
-    def parse_config(cls, config):
-        for field in config['fields']:
-            if field not in cls.valid_fields:
-                raise ValueError('invalid field for {}: {}'.format(cls.__name__, field))
-        return cls(config['fields'])
-
-    @classmethod
-    def load_hypothesis_sets(cls, filename):
-        return lsdscc.HypothesisSet.load_corpus(filename)
-
-    @classmethod
-    def load_reference_sets(cls):
-        return lsdscc.ReferenceSet.load_json_corpus()
-
-
-@register_metric
-class ADEMScore(MetricWrapper):
-    name = 'adem'
-    requires = (RAW_CONTEXTS, RAW_RESPONSES, RAW_REFERENCES, ADEM_MODEL)
-    init_requires = (ADEM_MODEL,)
-
-    def __init__(self, adem_model):
-        self.adem_model = adem_model
-
-    def __call__(self, raw_contexts, raw_responses, raw_references):
-        utterance = self.adem_model.get_scores(
-            contexts=raw_contexts,
-            gt_responses=raw_references,
-            model_responses=raw_responses,
-        )
-        return utterance, None
-
-
-@register_metric
-class RuberScore(MetricWrapper):
-    name = 'ruber'
-
-    def __init__(self):
-        pass

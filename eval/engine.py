@@ -1,13 +1,14 @@
 import argparse
+import itertools
 import json
 import logging
 import numbers
-from pathlib import Path
-
 import numpy as np
+import embedding_based as eb
 
+from pathlib import Path
 from eval.consts import *
-from eval.config_parser import parse_models_and_datasets
+from eval.config_parser import parse_models_and_datasets, parse_metrics
 
 logger = logging.getLogger(__name__)
 
@@ -17,30 +18,26 @@ class ResourceLoader:
         RESPONSES: ('model', 'token_list'),
         CONTEXTS: ('dataset', 'token_list'),
         REFERENCES: ('dataset', 'token_list'),
-        RAW_CONTEXTS: ('dataset', 'str_list'),
-        RAW_REFERENCES: ('dataset', 'str_list'),
-        RAW_RESPONSES: ('model', 'str_list'),
-
-        ADEM_MODEL: ('metric', 'adem_model'),
         EMBEDDINGS: ('metric', 'embeddings'),
-        HYPOTHESIS_SETS: ('model',),
-        REFERENCE_SETS: ('metric',),
     }
 
     def __init__(self):
-        pass
+        self.loaded_resources = {
+            'model': {},
+            'dataset': {},
+            'metric': {},
+        }
 
     def load(self, key, under_test):
         source, format = self.known_loader[key]
-        if source in ('model', 'dataset'):
-            source = getattr(under_test, source)
-            filename = getattr(source, key)
-            load_fn = getattr(self, 'load_' + format)
-            return load_fn(filename)
-        # source is metric
-        metric = under_test.metric
-        load_fn = getattr(metric, 'load_' + key)
-        return load_fn()
+        namespace = getattr(self.loaded_resources, source)
+        if key in namespace:
+            return namespace[key]
+
+        filename = getattr(under_test, key)
+        load_fn = getattr(self, 'load_' + format)
+        resource = load_fn(filename)
+        return namespace.setdefault(key, resource)
 
     def load_token_list(self, filename):
         with open(filename) as f:
@@ -49,6 +46,9 @@ class ResourceLoader:
     def load_str_list(self, filename):
         with open(filename) as f:
             return f.readlines()
+
+    def load_embeddings(self, filename):
+        return eb.load_word2vec_binary(filename)
 
 
 class UnderTest:
@@ -91,8 +91,13 @@ class UnderTest:
     def responses(self):
         return self.model.responses
 
+    @property
+    def embeddings(self):
+        return getattr(self.metric, 'embeddings_file')
+
 
 class Exporter:
+    CONFIG_JSON = 'config.json'
 
     def __init__(self, save_dir):
         self.save_dir = Path(save_dir)
@@ -136,24 +141,53 @@ class Exporter:
         else:
             raise TypeError
 
-    def export_json(self, under_test, result):
+    def export_json(self, result, under_test):
         result = self.process_result(under_test.metric, result)
         prefix = under_test.prefix
         output_path = self.save_dir.joinpath(prefix).with_suffix('.json')
         with output_path.open('w') as f:
             json.dump(result, f, default=self.default)
 
+    def export_config(self, config):
+        config_json = self.save_dir.joinpath(self.CONFIG_JSON)
+        config_json.write_text(json.dumps(config))
+
 
 class Engine:
-
     def __init__(self, config, save_dir):
         self.exporter = Exporter(save_dir)
-        self.under_tests =
+        self.loader = ResourceLoader()
+        self.config = config
+        try:
+            from eval.metrics import metrics_classes
+            self.metrics_classes = metrics_classes
+        except ImportError:
+            logger.error('metric_classes not available. Some of the packages were not installed?')
+            raise
+        self.under_tests = self.parse_config(config)
+
+    def parse_config(self, config):
+        metrics = parse_metrics(config['metrics'], self.metrics_classes)
+        models_and_datasets = parse_models_and_datasets(config)
+        return [
+            UnderTest(metric=metric, model=model, dataset=dataset)
+            for metric, (model, dataset) in itertools.product(metrics, models_and_datasets)
+        ]
+
+    def run(self):
+        self.exporter.export_config(self.config)
+        for under_test in self.under_tests:
+            payload = {key: self.loader.load(key, under_test) for key in under_test.metric.requires}
+            result = under_test.metric(**payload)
+            self.exporter.export_json(result, under_test)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--config', help='path to the config file')
     parser.add_argument('-p', '--prefix', help='path to output files')
     args = parser.parse_args()
 
+    from eval.config import config
+
+    engine = Engine(config, args.prefix)
+    engine.run()
