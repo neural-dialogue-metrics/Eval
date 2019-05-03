@@ -22,30 +22,22 @@ class ResourceLoader:
     }
 
     def __init__(self):
-        self.loaded_resources = {
-            'model': {},
-            'dataset': {},
-            'metric': {},
-        }
+        self.loaded_resources = {}
 
     def load(self, key, under_test):
         source, format = self.known_loader[key]
-        namespace = getattr(self.loaded_resources, source)
-        if key in namespace:
-            return namespace[key]
-
         filename = getattr(under_test, key)
+
+        if filename in self.loaded_resources:
+            return self.loaded_resources[filename]
+
         load_fn = getattr(self, 'load_' + format)
         resource = load_fn(filename)
-        return namespace.setdefault(key, resource)
+        return self.loaded_resources.setdefault(filename, resource)
 
     def load_token_list(self, filename):
         with open(filename) as f:
             return [line.split() for line in f]
-
-    def load_str_list(self, filename):
-        with open(filename) as f:
-            return f.readlines()
 
     def load_embeddings(self, filename):
         return eb.load_word2vec_binary(filename)
@@ -70,10 +62,7 @@ class UnderTest:
 
     @property
     def metric_name(self):
-        base = self.metric.name
-        if self.metric.variant:
-            return self.SEPARATOR.join((base, self.metric.variant))
-        return base
+        return self.metric.fullname
 
     @property
     def prefix(self):

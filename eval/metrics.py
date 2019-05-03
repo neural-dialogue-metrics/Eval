@@ -33,6 +33,18 @@ class MetricWrapper:
     def __call__(self, *args, **kwargs):
         raise NotImplementedError
 
+    @property
+    def fullname(self):
+        parts = []
+        if self.name:
+            parts.append(self.name)
+        if self.variant:
+            parts.append(self.variant)
+        name = '_'.join(parts)
+        if not name:
+            raise ValueError('{} has no valid fullname'.format(self.__class__.__name__))
+        return name
+
 
 @register_metric
 class BleuScore(MetricWrapper):
@@ -63,6 +75,10 @@ class BleuScore(MetricWrapper):
         n_list = config['n']
         for n in n_list:
             yield cls(n, smoothing)
+
+    @property
+    def fullname(self):
+        return '_'.join((self.name, str(self.n)))
 
 
 @register_metric
@@ -100,10 +116,6 @@ class EmbeddingBasedScore(MetricWrapper):
     def parse_config(cls, config):
         for v in config['variants']:
             yield cls.new(v, config['embeddings'])
-
-    @classmethod
-    def load_embeddings(cls, filename):
-        return eb.load_word2vec_binary(filename)
 
 
 @register_metric
@@ -148,6 +160,12 @@ class RougeScore(MetricWrapper):
             elif variant == 'rouge_w':
                 yield cls.new(variant, alpha=alpha, weight=config.get('weight'))
 
+    @property
+    def fullname(self):
+        if self.variant == 'rouge_n':
+            return 'rouge_{}'.format(self.params['n'])
+        return self.variant
+
 
 @register_metric
 class DistinctScore(MetricWrapper):
@@ -165,3 +183,7 @@ class DistinctScore(MetricWrapper):
     def parse_config(cls, config):
         for n in config['n']:
             yield cls(n)
+
+    @property
+    def fullname(self):
+        return 'distinct_{}'.format(self.n)
