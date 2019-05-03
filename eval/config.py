@@ -1,4 +1,4 @@
-from eval.utils import data_path, ruber_data
+from eval.utils import data_path
 from pathlib import Path
 
 GOOGLE_NEWS_300_BIN = '/home/cgsdfc/embeddings/word2vec/GoogleNews_negative300/GoogleNews-vectors-negative300.bin'
@@ -51,17 +51,5 @@ config = {
             ],
             'embeddings': GOOGLE_NEWS_300_BIN,
         },
-        'adem': True,
-        'ruber': {
-            'variants': ['hybrid', 'ref', 'unref'],
-            'ubuntu': ruber_data(
-                train_dir='',
-                data_dir='',
-                embedding='',
-            )
-        },
-        'lsdscc': {
-            'fields': ['max_bleu', 'mds', 'pds']
-        }
     }
 }

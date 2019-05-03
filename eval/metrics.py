@@ -4,7 +4,6 @@ from distinct_n import distinct_n_sentence_level
 import embedding_based as eb
 import lsdscc
 import rouge
-import json
 
 from eval.consts import *
 
@@ -19,27 +18,19 @@ def register_metric(cls):
     return _register
 
 
-class Score:
-
-    def __init__(self, name, utterance, system=None, params=None, variant=None):
-        self.name = name
-        self.utterance = utterance
-        self.system = system
-        self.params = params
-        self.variant = variant
-
-    def json(self, writer):
-        json.dump(self.__dict__, writer)
-
-
 class MetricWrapper:
+    # __call__ requires
     requires = None
+    # __init__ requires
     init_requires = None
-
+    # extract this field for each utterance score
+    utterance_field = None
+    # extract this field for system score.
+    system_field = None
+    # name corresponding to a class
     name = None
-    field = None
+    # name corresponding to an instance (optional)
     variant = None
-    params = None
 
     def __call__(self, *args, **kwargs):
         raise NotImplementedError
@@ -50,6 +41,8 @@ class BleuScore(MetricWrapper):
     name = 'bleu'
     cherry = SmoothingFunction()
     requires = (RESPONSES, REFERENCES, LIST_OF_REFERENCES)
+    utterance_field = 'bleu'
+    system_field = 'bleu'
 
     def __init__(self, n, smoothing):
         self.n = n
@@ -78,6 +71,7 @@ class BleuScore(MetricWrapper):
 class EmbeddingBasedScore(MetricWrapper):
     name = 'embedding_based'
     requires = (RESPONSES, REFERENCES, EMBEDDINGS)
+    system_field = 'mean'
     variants = {
         'vector_average': (eb.average_sentence_level, eb.average_corpus_level),
         'vector_extrema': (eb.extrema_sentence_level, eb.extrema_corpus_level),
@@ -118,6 +112,8 @@ class EmbeddingBasedScore(MetricWrapper):
 class RougeScore(MetricWrapper):
     name = 'rouge'
     requires = (REFERENCES, RESPONSES)
+    utterance_field = 'f1_measure'
+    system_field = utterance_field
     variants = {
         'rouge_n': (rouge.rouge_n_sentence_level, rouge.rouge_n_summary_level),
         'rouge_l': (rouge.rouge_l_sentence_level, rouge.rouge_l_summary_level),
@@ -165,7 +161,7 @@ class DistinctScore(MetricWrapper):
 
     def __call__(self, responses):
         utterance = [distinct_n_sentence_level(s, self.n) for s in responses]
-        return utterance
+        return utterance, None
 
     @classmethod
     def parse_config(cls, config):
@@ -173,6 +169,7 @@ class DistinctScore(MetricWrapper):
             yield cls(n)
 
 
+@register_metric
 class LSDSCCScore(MetricWrapper):
     name = 'lsdscc'
     valid_fields = ('max_bleu', 'mds', 'pds')
@@ -186,7 +183,7 @@ class LSDSCCScore(MetricWrapper):
             lsdscc.compute_score_on_hypothesis_set(h, r)
             for h, r in zip(hypothesis_sets, reference_sets)
         ]
-        return utterance
+        return utterance, None
 
     @classmethod
     def parse_config(cls, config):
@@ -219,9 +216,10 @@ class ADEMScore(MetricWrapper):
             gt_responses=raw_references,
             model_responses=raw_responses,
         )
-        return utterance
+        return utterance, None
 
 
+@register_metric
 class RuberScore(MetricWrapper):
     name = 'ruber'
 
