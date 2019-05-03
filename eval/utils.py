@@ -1,5 +1,5 @@
 from pathlib import Path
-import os
+from eval.consts import SEPARATOR
 
 
 def ruber_data(train_dir, data_dir, embedding):
@@ -51,7 +51,6 @@ class Dataset:
 
 
 class UnderTest:
-    SEPARATOR = '-'
 
     def __init__(self, metric, model, dataset):
         if model.trained_on != dataset.name:
@@ -76,8 +75,15 @@ class UnderTest:
         return self.metric.fullname
 
     @property
+    def parts(self):
+        return self.model_name, self.dataset_name, self.metric_name
+
+    @property
     def prefix(self):
-        return self.SEPARATOR.join((self.model_name, self.dataset_name, self.metric_name))
+        parts = self.parts
+        if any(SEPARATOR in part for part in parts):
+            raise ValueError('{!r} is not allowed in names'.format(SEPARATOR))
+        return SEPARATOR.join(parts)
 
     @property
     def contexts(self):
