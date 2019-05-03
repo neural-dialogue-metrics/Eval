@@ -35,6 +35,9 @@ class Model:
         self.trained_on = trained_on
         self.responses = responses
 
+    def __repr__(self):
+        return '<{} {}>'.format(self.__class__.__qualname__, self.name)
+
 
 class Dataset:
     def __init__(self, name, contexts, references):
@@ -42,15 +45,22 @@ class Dataset:
         self.contexts = contexts
         self.references = references
 
+    def __repr__(self):
+        return '<{} {}>'.format(self.__class__.__qualname__, self.name)
+
 
 class UnderTest:
     SEPARATOR = '-'
 
     def __init__(self, metric, model, dataset):
-        assert model.trained_on == dataset
+        if model.trained_on != dataset.name:
+            raise ValueError('model {} was not trained on dataset {}'.format(model.name, dataset.name))
         self.metric = metric
         self.model = model
         self.dataset = dataset
+
+    def __repr__(self):
+        return f'<{self.__class__.__qualname__}: {self.model_name}, {self.dataset_name}, {self.metric_name}>'
 
     @property
     def model_name(self):

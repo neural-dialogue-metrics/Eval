@@ -9,11 +9,8 @@ metrics_classes = {}
 
 
 def register_metric(cls):
-    def _register():
-        metrics_classes[cls.name] = cls
-        return cls
-
-    return _register
+    metrics_classes[cls.name] = cls
+    return cls
 
 
 class MetricWrapper:

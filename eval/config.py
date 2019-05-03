@@ -31,8 +31,7 @@ config = {
     'metrics': {
         'bleu': {
             'n': [4],
-            'smoothing': False,
-            'filter': []
+            'smoothing': True,
         },
         'rouge': {
             'alpha': 0.9,
