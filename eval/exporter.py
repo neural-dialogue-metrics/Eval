@@ -5,11 +5,12 @@ import numpy as np
 import pprint
 import json
 
+from eval.consts import CONFIG_JSON
+
 logger = logging.getLogger(__name__)
 
 
 class Exporter:
-    CONFIG_JSON = 'config.json'
 
     def __init__(self, save_dir):
         self.save_dir = Path(save_dir)
@@ -69,5 +70,5 @@ class Exporter:
         return output_path
 
     def export_config(self, config):
-        config_json = self.save_dir.joinpath(self.CONFIG_JSON)
+        config_json = self.save_dir.joinpath(CONFIG_JSON)
         config_json.write_text(json.dumps(config, default=lambda obj: obj.__dict__))

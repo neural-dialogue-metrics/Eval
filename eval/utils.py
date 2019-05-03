@@ -36,7 +36,8 @@ class Model:
         self.responses = responses
 
     def __repr__(self):
-        return '<{} {}>'.format(self.__class__.__qualname__, self.name)
+        return '<{} {} on {}>'.format(
+            self.__class__.__qualname__, self.name, self.trained_on)
 
 
 class Dataset:

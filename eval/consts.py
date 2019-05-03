@@ -20,3 +20,6 @@ RAW_REFERENCES = 'raw_references'
 
 # default embeddings for EB.
 GOOGLE_NEWS_300_BIN = '/home/cgsdfc/embeddings/word2vec/GoogleNews_negative300/GoogleNews-vectors-negative300.bin'
+
+# The name of the dump of config.
+CONFIG_JSON = 'config.json'
