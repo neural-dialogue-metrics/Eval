@@ -47,9 +47,7 @@ class MetricWrapper:
 class BleuScore(MetricWrapper):
     name = 'bleu'
     cherry = SmoothingFunction()
-    requires = (RESPONSES, REFERENCES, LIST_OF_REFERENCES)
-    utterance_field = 'bleu'
-    system_field = 'bleu'
+    requires = (RESPONSES, REFERENCES)
 
     def __init__(self, n, smoothing):
         self.n = n
@@ -57,11 +55,10 @@ class BleuScore(MetricWrapper):
         self._weights = [1 / n for _ in range(n)]
         self._smoothing_fn = self.cherry.method1 if smoothing else self.cherry.method0
 
-    def __call__(self, responses, references, list_of_references=None):
+    def __call__(self, responses, references):
+        list_of_references = [[ref] for ref in references]
         utterance = [sentence_bleu(ref, hypo, self._weights, smoothing_function=self._smoothing_fn)
-                     for ref, hypo in zip(references, responses)]
-        if list_of_references is None:
-            list_of_references = [[ref] for ref in references]
+                     for ref, hypo in zip(list_of_references, responses)]
         system = corpus_bleu(list_of_references, responses, self._weights)
         return utterance, system
 
@@ -130,8 +127,8 @@ class RougeScore(MetricWrapper):
     def __init__(self, variant, sentence_level, corpus_level, params):
         self.variant = variant
         self.params = params
-        self.sentence_level = lambda s, r: sentence_level(s, r, **params).f1_measure
-        self.corpus_level = lambda s, r: corpus_level(s, r, **params).f1_measure
+        self.sentence_level = lambda s, r: sentence_level(s, r, **params)
+        self.corpus_level = lambda s, r: corpus_level(s, r, **params)
 
     def __call__(self, responses, references):
         utterance = [

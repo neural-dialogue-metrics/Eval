@@ -1,5 +1,5 @@
 import embedding_based as eb
-from eval.consts import RESPONSES, CONTEXTS, REFERENCES, EMBEDDINGS
+from eval.consts import *
 
 
 class ResourceLoader:

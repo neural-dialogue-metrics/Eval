@@ -31,18 +31,34 @@ class Engine:
             for metric, (model, dataset) in itertools.product(metrics, models_and_datasets)
         ]
 
+    def load_resources(self, under_test):
+        try:
+            return {key: self.loader.load(key, under_test) for key in under_test.metric.requires}
+        except FileNotFoundError as e:
+            logger.warning('File not found: %s, skipping...', e.filename)
+            return None
+
     def run(self):
         logger.info('save_dir: %s', self.exporter.save_dir)
         logger.info('config: %s', pprint.pformat(self.config))
 
         self.exporter.export_config(self.config)
         for under_test in self.under_tests:
-            logger.info('Model: %s, Dataset: %s, Metric: %s', under_test.model_name,
-                        under_test.dataset_name, under_test.metric_name)
+            output_path = self.exporter.get_output_path(under_test)
+            if output_path.is_file() and not self.config.get('force'):
+                logger.info('skipping existing file %s', output_path)
+                continue
+
+            logger.info('Running under_test: %r', under_test)
             logger.info('Loading resources: %s', ', '.join(under_test.metric.requires))
-            payload = {key: self.loader.load(key, under_test) for key in under_test.metric.requires}
+            payload = self.load_resources(under_test)
+            if payload is None:
+                continue
 
             logger.info('Calculating scores...')
-            result = under_test.metric(**payload)
-
-            self.exporter.export_json(result, under_test)
+            try:
+                result = under_test.metric(**payload)
+            except KeyboardInterrupt:
+                logging.warning('interrupted, skipping...')
+            else:
+                self.exporter.export_json(result, under_test)
