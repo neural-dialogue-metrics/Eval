@@ -70,4 +70,4 @@ class Exporter:
 
     def export_config(self, config):
         config_json = self.save_dir.joinpath(self.CONFIG_JSON)
-        config_json.write_text(json.dumps(config))
+        config_json.write_text(json.dumps(config, default=lambda obj: obj.__dict__))

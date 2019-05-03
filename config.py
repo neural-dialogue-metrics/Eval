@@ -13,5 +13,5 @@ config = {
     ],
     'datasets': [
         get_dataset('ubuntu'),
-    ]
+    ],
 }

@@ -11,10 +11,11 @@ logger = logging.getLogger(__name__)
 
 
 class Engine:
-    def __init__(self, config, save_dir):
+    def __init__(self, config, save_dir, force=False):
         self.exporter = Exporter(save_dir)
         self.loader = ResourceLoader()
         self.config = config
+        self.force = force
 
         self.under_tests = self.parse_config(config)
 
@@ -40,7 +41,7 @@ class Engine:
         self.exporter.export_config(self.config)
         for under_test in self.under_tests:
             output_path = self.exporter.get_output_path(under_test)
-            if output_path.is_file() and not self.config.get('force'):
+            if output_path.is_file() and not self.force:
                 logger.info('skipping existing file %s', output_path)
                 continue
 
