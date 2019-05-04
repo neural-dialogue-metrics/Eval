@@ -30,3 +30,8 @@ SEPARATOR = '-'
 SAMPLE_SIZE = 1000
 
 RANDOM_STATE = 1
+
+# Correlation methods in pandas names.
+PEARSON = 'pearson'
+KENDALL = 'kendall'
+SPEARMAN = 'spearman'
