@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-python eval/main.py -p save
+python main.py -p save
