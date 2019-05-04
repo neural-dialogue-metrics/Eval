@@ -38,6 +38,10 @@ class UtterScoreDist:
     def get_dataset(self):
         return get_dataset(self.dataset)
 
+    @property
+    def parts(self):
+        return self.model, self.dataset, self.metric
+
     def __repr__(self):
         return f'<{self.__class__.__name__}: {self.name}>'
 

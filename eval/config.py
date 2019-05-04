@@ -20,8 +20,8 @@ datasets = {
         REFERENCES: '/home/cgsdfc/UbuntuDialogueCorpus/ResponseContextPairs/raw_testing_responses.txt',
     },
     'opensub': {
-        CONTEXTS: '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/test.context.txt',
-        REFERENCES: '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/test.response.txt',
+        CONTEXTS: '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/eval/test.context.txt',
+        REFERENCES: '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/eval/test.response.txt',
     }
 }
 
@@ -34,7 +34,7 @@ metrics = {
         'alpha': 0.9,
         'weight': 1.2,
         'n': [2],
-        'variants': ['rouge_n', 'rouge_l', 'rouge_w'],
+        'variants': ['rouge_n'],
     },
     'distinct_n': {
         'n': [1, 2]

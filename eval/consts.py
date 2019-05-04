@@ -37,3 +37,6 @@ KENDALL = 'kendall'
 SPEARMAN = 'spearman'
 
 ALL_METHODS = (PEARSON, KENDALL, SPEARMAN)
+
+# transparency of scatter plot.
+SCATTER_ALPHA = 0.5
