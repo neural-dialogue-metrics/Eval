@@ -35,3 +35,5 @@ RANDOM_STATE = 1
 PEARSON = 'pearson'
 KENDALL = 'kendall'
 SPEARMAN = 'spearman'
+
+ALL_METHODS = (PEARSON, KENDALL, SPEARMAN)

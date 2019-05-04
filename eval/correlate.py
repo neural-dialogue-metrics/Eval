@@ -1,18 +1,19 @@
-import itertools
 import json
+import collections
+import json
+import logging
 import re
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-import logging
-import collections
-
-from sklearn.preprocessing import scale as sklearn_scale
-from pandas.plotting import scatter_matrix
-from eval.repo import get_model, get_dataset
-from eval.consts import SAMPLE_SIZE, RANDOM_STATE, CONFIG_JSON, SEPARATOR
 from eval.consts import PEARSON
+from eval.consts import SAMPLE_SIZE, RANDOM_STATE, SEPARATOR, ALL_METHODS
+from eval.repo import get_model, get_dataset
+from pandas import ExcelWriter
+from pandas.plotting import scatter_matrix
+from sklearn.preprocessing import scale as sklearn_scale
 
 logger = logging.getLogger(__name__)
 
@@ -55,12 +56,6 @@ class UtterScoreDist:
 
 
 DATA_FILENAME_RE = re.compile(r'\w+-\w+-\w+\.json')
-
-
-def load_dists_from_dir(dist_dir):
-    dist_dir = Path(dist_dir)
-    json_files = filter(lambda path: DATA_FILENAME_RE.match(path.name), dist_dir.glob('*.json'))
-    return [UtterScoreDist.from_json_file(path) for path in json_files]
 
 
 class PairwiseCorr:
@@ -113,3 +108,61 @@ class DistGroup:
 
     def __len__(self):
         return len(self.group)
+
+
+def find_all_data_files(dist_dir):
+    dist_dir = Path(dist_dir)
+    data_files = filter(lambda path: DATA_FILENAME_RE.match(path.name), dist_dir.glob('*.json'))
+    return list(data_files)
+
+
+def load_dists_from_dir(dist_dir):
+    return [UtterScoreDist.from_json_file(path) for path in find_all_data_files(dist_dir)]
+
+
+def load_all(prefix, include='*'):
+    logger.info('loading data from %s', prefix)
+    data_files = find_all_data_files(prefix)
+    data_dicts = [json.load(file.open()) for file in data_files if file.match(include)]
+    return pd.DataFrame.from_records(data=data_dicts)
+
+
+def to_utterance_scores(df: pd.DataFrame):
+    data_dict = {s.metric: s.utterance for _, s in df.iterrows()}
+    return pd.DataFrame(data=data_dict)
+
+
+def plot_scatter_matrix(df: pd.DataFrame, title):
+    df.sort_index(axis=1, inplace=True)
+    scatter_matrix(scale_and_sample(df), diagonal='kde', figsize=(20, 20))
+    plt.suptitle(title)
+
+
+def inter_metric_corr(prefix, output_file):
+    # inter-metric correlation on each group of (model, dataset).
+    df = load_all(prefix)
+    group_by = df.groupby(['model', 'dataset'])
+    with ExcelWriter(output_file) as writer:
+        for (model, dataset), score in group_by:
+            score = to_utterance_scores(score)
+            for method in ALL_METHODS:
+                logger.info('computing %s on %s-%s', method, model, dataset)
+                corr = score.corr(method)
+                sheet_name = SEPARATOR.join((model, dataset, method))
+                corr.to_excel(writer, sheet_name=sheet_name)
+    logger.info('write to %s', output_file)
+
+
+def inter_metric_scatter_plot(prefix, save_dir=None):
+    df = load_all(prefix)
+    group_by = df.groupby(['model', 'dataset'])
+    for (model, dataset), score in group_by:
+        score = to_utterance_scores(score)
+        title = f'Metrics measuring {model} trained on {dataset}'
+        plot_scatter_matrix(score, title)
+        if save_dir is None:
+            plt.show()
+        else:
+            path = Path(save_dir).joinpath(SEPARATOR.join((model, dataset))).with_suffix('.png')
+            logger.info('saving figure to %s', path)
+            plt.savefig(path)
