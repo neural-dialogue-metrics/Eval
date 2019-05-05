@@ -57,3 +57,6 @@ METEOR_TEMPLATE_FILE = 'meteor.sh.template'
 METEOR_JAR_FILE = 'meteor-1.5.jar'
 
 METEOR_ROOT = '/home/cgsdfc/deployment/Metrics/METEOR/meteor-1.5'
+
+# lsdscc
+MULTI_RESPONSES = 'multi_responses'

@@ -23,7 +23,7 @@ loader_fns = {
 
 
 class ResourceLoader:
-    known_loader = {
+    default_load_info = {
         # key, source, format.
         RESPONSES: ('model', 'token_list'),
         CONTEXTS: ('dataset', 'token_list'),
@@ -39,7 +39,7 @@ class ResourceLoader:
         requires = under_test.metric.requires
         if isinstance(requires, (list, tuple)):
             # only keys are listed.
-            known_loader = self.known_loader
+            known_loader = self.default_load_info
         elif isinstance(requires, dict):
             # detailed loader info of keys are given.
             known_loader = requires
@@ -59,7 +59,7 @@ class ResourceLoader:
         elif isinstance(value, str):
             format = value
             # fell back.
-            source = self.known_loader[key][0]
+            source = self.default_load_info[key][0]
         else:
             raise TypeError('invalid type: {}'.format(type(value)))
         return self.requires_cache.setdefault(cache_key, (source, format))
@@ -73,6 +73,11 @@ class ResourceLoader:
         if filename in self.loaded_resources:
             return self.loaded_resources[filename]
 
-        load_fn = loader_fns[format]
+        if callable(format):
+            load_fn = format
+        elif isinstance(format, str):
+            load_fn = loader_fns[format]
+        else:
+            raise TypeError('invalid type for format: {}'.format(type(format)))
         resource = load_fn(filename)
         return self.loaded_resources.setdefault(filename, resource)

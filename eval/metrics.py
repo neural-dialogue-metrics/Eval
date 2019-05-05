@@ -6,6 +6,7 @@ from pathlib import Path
 from nltk.translate.bleu_score import sentence_bleu, corpus_bleu, SmoothingFunction
 
 import embedding_based as eb
+import lsdscc
 import rouge
 from distinct_n import distinct_n_sentence_level
 from eval.consts import *
@@ -260,3 +261,41 @@ class METEORScore(MetricWrapper):
         system = self.SYSTEM_SCORE_RE.search(text)
         system = float(system.group(1))
         return utterance, system
+
+
+@register_metric
+class LSDSCCScore(MetricWrapper):
+    name = 'lsdscc'
+    utterance_field = ('max_bleu', 'pds', 'mds')
+
+    requires = {
+        MULTI_RESPONSES: ('model', lsdscc.HypothesisSet.load_corpus),
+        REFERENCES: ('metric', lsdscc.ReferenceSet.load_json_corpus),
+    }
+
+    from lsdscc.align import NLTKBleuAligner, NLTKNistAligner
+    aligner_map = {
+        'bleu': NLTKBleuAligner,
+        'nist': NLTKNistAligner,
+    }
+
+    def __init__(self, aligner=None, refset=None):
+        self.aligner = self.aligner_map.get(aligner)
+        self.refset = refset
+
+    def __call__(self, multi_responses, references):
+        assert isinstance(multi_responses, lsdscc.HypothesisSet)
+        utterance = lsdscc.compute_score_on_hypothesis_set(
+            hypothesis_set=multi_responses,
+            reference_set=references,
+            aligner=self.aligner,
+        )
+        return utterance, None
+
+    @property
+    def references(self):
+        return self.refset or lsdscc.default_reference_set
+
+    @classmethod
+    def parse_config(cls, config):
+        return cls(config.get('aligner'), config.get('refset'))
