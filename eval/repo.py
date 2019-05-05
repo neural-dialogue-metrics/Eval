@@ -6,7 +6,7 @@ from eval.utils import Dataset, Model, model_path
 
 
 def get_model(name, trained_on):
-    for model in models:
+    for model in all_models:
         if name == model.name and trained_on == model.trained_on:
             return model
     raise ValueError('unknown model: {} on {}'.format(name, trained_on))
@@ -14,7 +14,7 @@ def get_model(name, trained_on):
 
 def get_dataset(name):
     try:
-        params = datasets[name]
+        params = all_datasets[name]
     except KeyError as e:
         raise ValueError('unknown dataset: {}'.format(name)) from e
     return Dataset(
@@ -22,6 +22,14 @@ def get_dataset(name):
         references=params[REFERENCES],
         contexts=params[CONTEXTS],
     )
+
+
+def get_config(models=None, datasets=None, metrics=None):
+    return {
+        'models': models or all_models,
+        'datasets': datasets or all_datasets,
+        'metrics': metrics or all_metrics,
+    }
 
 
 def find_pretrained_serban_model(prefix, trained_on):
@@ -50,7 +58,7 @@ def find_serban_ubuntu_models():
     )
 
 
-models = [
+all_models = [
     model_path('/home/cgsdfc/Result/HRED-VHRED/Ubuntu/VHRED/output.txt'),
     model_path('/home/cgsdfc/Result/HRED-VHRED/Ubuntu/LSTM/output.txt'),
     model_path('/home/cgsdfc/Result/HRED-VHRED/Ubuntu/HRED/output.txt'),
@@ -59,7 +67,7 @@ models = [
     model_path('/home/cgsdfc/Result/HRED-VHRED/Opensub/VHRED/output.txt'),
 ]
 
-datasets = {
+all_datasets = {
     'ubuntu': {
         CONTEXTS: '/home/cgsdfc/UbuntuDialogueCorpus/ResponseContextPairs/raw_testing_contexts.txt',
         REFERENCES: '/home/cgsdfc/UbuntuDialogueCorpus/ResponseContextPairs/raw_testing_responses.txt',
@@ -70,7 +78,7 @@ datasets = {
     }
 }
 
-metrics = {
+all_metrics = {
     'bleu': {
         'n': [4],
         'smoothing': True,
@@ -93,8 +101,8 @@ metrics = {
     },
 }
 
-config = {
-    'models': models,
-    'datasets': datasets,
-    'metrics': metrics
+default_config = {
+    'models': all_models,
+    'datasets': all_datasets,
+    'metrics': all_metrics
 }

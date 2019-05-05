@@ -6,10 +6,19 @@ from eval.consts import *
 
 logger = logging.getLogger(__name__)
 
+
+def load_filename(filename):
+    filename = Path(filename).absolute()
+    if not filename.exists():
+        logger.warning('{} not found'.format(filename))
+        raise FileNotFoundError
+    return filename
+
+
 loader_fns = {
     'token_list': eb.load_corpus_from_file,
     'embeddings': eb.load_word2vec_binary,
-    'filename': lambda filename: Path(filename).absolute(),
+    'filename': load_filename,
 }
 
 

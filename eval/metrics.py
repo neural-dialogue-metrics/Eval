@@ -1,3 +1,4 @@
+import re
 import subprocess
 import logging
 from pathlib import Path
@@ -227,4 +228,35 @@ class ADEMScore(MetricWrapper):
         logger.info('running cmd {}'.format(cmd))
         subprocess.check_call(cmd, shell=True, universal_newlines=True)
         file_content = self.OUTPUT_FILE.read_text()
-        return list(map(int, file_content.splitlines())), None
+        return list(map(float, file_content.splitlines())), None
+
+
+@register_metric
+class METEORScore(MetricWrapper):
+    name = 'meteor'
+    requires = {
+        REFERENCES: 'filename',
+        RESPONSES: 'filename',
+    }
+
+    # Segment 18920 score:    0.33113214948831016
+    SEGMENT_SCORE_RE = re.compile(r'^Segment \d+ score:\s+(.*)$', flags=re.MULTILINE)
+    # Final score:            0.1634213080811731
+    SYSTEM_SCORE_RE = re.compile(r'Final score:\s+(.*)')
+
+    from eval.consts import METEOR_TEMPLATE_FILE, METEOR_JAR_FILE, METEOR_ROOT
+    TEMPLATE = Path(__file__).with_name(METEOR_TEMPLATE_FILE).read_text()
+
+    def __call__(self, references, responses):
+        cmd = self.TEMPLATE.format(
+            jar_file=self.METEOR_JAR_FILE,
+            references=references,
+            responses=responses,
+        )
+        logger.info('cmd: {}'.format(cmd))
+        text = subprocess.check_output(cmd, shell=True, cwd=self.METEOR_ROOT, universal_newlines=True)
+        utterance = self.SEGMENT_SCORE_RE.findall(text)
+        utterance = list(map(float, utterance))
+        system = self.SYSTEM_SCORE_RE.search(text)
+        system = float(system.group(1))
+        return utterance, system
