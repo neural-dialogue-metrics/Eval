@@ -29,7 +29,7 @@ class Engine:
 
     def load_resources(self, under_test):
         try:
-            return {key: self.loader.load(key, under_test) for key in under_test.metric.requires}
+            return self.loader.load_requires(under_test)
         except FileNotFoundError as e:
             logger.warning('File not found: %s, skipping...', e.filename)
             return None
