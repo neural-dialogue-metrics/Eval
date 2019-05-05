@@ -49,7 +49,7 @@ class MetricWrapper:
 
     @classmethod
     def parse_config(cls, config):
-        return cls()
+        yield cls()
 
 
 @register_metric

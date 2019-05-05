@@ -1,6 +1,16 @@
 import embedding_based as eb
+import logging
+
 from pathlib import Path
 from eval.consts import *
+
+logger = logging.getLogger(__name__)
+
+loader_fns = {
+    'token_list': eb.load_corpus_from_file,
+    'embeddings': eb.load_word2vec_binary,
+    'filename': lambda filename: Path(filename).absolute(),
+}
 
 
 class ResourceLoader:
@@ -14,6 +24,7 @@ class ResourceLoader:
 
     def __init__(self):
         self.loaded_resources = {}
+        self.requires_cache = {}
 
     def load_requires(self, under_test):
         requires = under_test.metric.requires
@@ -27,34 +38,32 @@ class ResourceLoader:
             raise TypeError('invalid type for requires: {}'.format(type(requires)))
         return {key: self.load_for_key(key, under_test, known_loader) for key in requires}
 
+    def get_load_info(self, key, requires):
+        # find out how to load a key in a requires.
+        cache_key = (key, id(requires))
+        if cache_key in self.requires_cache:
+            return self.requires_cache[cache_key]
+
+        value = requires[key]
+        if isinstance(value, (tuple, list)):
+            source, format = value
+        elif isinstance(value, str):
+            format = value
+            # fell back.
+            source = self.known_loader[key][0]
+        else:
+            raise TypeError('invalid type: {}'.format(type(value)))
+        return self.requires_cache.setdefault(cache_key, (source, format))
+
     def load_for_key(self, key, under_test, requires):
         assert isinstance(requires, dict)
+        source, format = self.get_load_info(key, requires)
+        logger.info('source: {}, format: {}'.format(source, format))
 
-        def get_load_info():
-            value = requires[key]
-            if isinstance(value, (tuple, list)):
-                source, format = value
-            elif isinstance(value, str):
-                format = value
-                source = self.known_loader[key][0]
-            else:
-                raise TypeError('invalid type: {}'.format(type(value)))
-            return source, format
-
-        source, format = get_load_info()
         filename = getattr(under_test, key)
         if filename in self.loaded_resources:
             return self.loaded_resources[filename]
-        load_fn = getattr(self, 'load_' + format)
+
+        load_fn = loader_fns[format]
         resource = load_fn(filename)
         return self.loaded_resources.setdefault(filename, resource)
-
-    def load_token_list(self, filename):
-        with open(filename) as f:
-            return [line.split() for line in f]
-
-    def load_embeddings(self, filename):
-        return eb.load_word2vec_binary(filename)
-
-    def load_filename(self, filename):
-        return Path(filename).absolute()

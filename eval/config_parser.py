@@ -80,8 +80,9 @@ def load_config(filename):
     if filename.suffix == '.json':
         config = json.load(filename.open())
     elif filename.suffix == '.py':
+        code = compile(filename.read_text(), filename, 'exec')
         globals = {}
-        exec(filename.read_text(), globals)
+        exec(code, globals)
         config = globals['config']
     else:
         raise ValueError('invalid file type for config file: {}'.format(filename))
