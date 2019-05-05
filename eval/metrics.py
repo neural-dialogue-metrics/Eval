@@ -42,6 +42,10 @@ class MetricWrapper:
             raise ValueError('{} has no valid fullname'.format(self.__class__.__name__))
         return name
 
+    @classmethod
+    def parse_config(cls, config):
+        raise NotImplementedError
+
 
 @register_metric
 class BleuScore(MetricWrapper):
@@ -182,3 +186,17 @@ class DistinctScore(MetricWrapper):
     @property
     def fullname(self):
         return 'distinct_{}'.format(self.n)
+
+
+@register_metric
+class UtteranceLenScore(MetricWrapper):
+    name = 'utterance_len'
+    requires = (RESPONSES,)
+
+    def __call__(self, responses):
+        utterance = [len(r) for r in responses]
+        return utterance, None
+
+    @classmethod
+    def parse_config(cls, config):
+        return cls()
