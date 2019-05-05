@@ -1,3 +1,7 @@
+import subprocess
+import logging
+from pathlib import Path
+
 from nltk.translate.bleu_score import sentence_bleu, corpus_bleu, SmoothingFunction
 
 import embedding_based as eb
@@ -5,6 +9,7 @@ import rouge
 from distinct_n import distinct_n_sentence_level
 from eval.consts import *
 
+logger = logging.getLogger(__name__)
 metrics_classes = {}
 
 
@@ -44,7 +49,7 @@ class MetricWrapper:
 
     @classmethod
     def parse_config(cls, config):
-        raise NotImplementedError
+        return cls()
 
 
 @register_metric
@@ -197,6 +202,29 @@ class UtteranceLenScore(MetricWrapper):
         utterance = [len(r) for r in responses]
         return utterance, None
 
-    @classmethod
-    def parse_config(cls, config):
-        return cls()
+
+@register_metric
+class ADEMScore(MetricWrapper):
+    name = 'adem'
+    requires = {
+        CONTEXTS: 'filename',
+        REFERENCES: 'filename',
+        RESPONSES: 'filename',
+    }
+
+    from eval.consts import ADEM_TEMPLATE_FILE, ADEM_IMAGE, ADEM_ROOT, ADEM_OUTPUT_FILE
+    OUTPUT_FILE = Path(ADEM_ROOT).joinpath(ADEM_OUTPUT_FILE)
+    TEMPLATE = Path(__file__).with_name(ADEM_TEMPLATE_FILE).read_text()
+
+    def __call__(self, contexts, references, responses):
+        cmd = self.TEMPLATE.format(
+            contexts=contexts,
+            references=references,
+            responses=responses,
+            adem_image=self.ADEM_IMAGE,
+            adem_root=self.ADEM_ROOT,
+        )
+        logger.info('running cmd {}'.format(cmd))
+        subprocess.check_call(cmd, shell=True, universal_newlines=True)
+        file_content = self.OUTPUT_FILE.read_text()
+        return list(map(int, file_content.splitlines())), None

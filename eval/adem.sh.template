@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+IMAGE={adem_image}
+PROJECT_PATH={adem_root}
+
+docker run --runtime nvidia --rm -it \
+    -w $PROJECT_PATH \
+    -e PYTHONPATH=$PROJECT_PATH \
+    $IMAGE python entry.py {contexts} {references} {responses}
