@@ -1,6 +1,6 @@
 from setuptools import setup
 
-__version__ = '0.1.2'
+from eval import __version__
 
 setup(
     name='EvalHelper',

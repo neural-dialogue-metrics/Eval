@@ -40,3 +40,4 @@ ALL_METHODS = (PEARSON, KENDALL, SPEARMAN)
 
 # transparency of scatter plot.
 SCATTER_ALPHA = 0.5
+SERBAN_UBUNTU_MODEL_DIR = '/home/cgsdfc/UbuntuDialogueCorpus/ResponseContextPairs/ModelPredictions'

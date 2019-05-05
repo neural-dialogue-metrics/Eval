@@ -1,12 +1,10 @@
 import itertools
-
+import json
+import logging
 from pathlib import Path
 
-import json
-
+from eval.consts import CONTEXTS, REFERENCES
 from eval.utils import Model, Dataset, model_path
-from eval.consts import CONTEXTS, REFERENCES, RESPONSES
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -63,8 +61,8 @@ def parse_models(config):
 
 
 def parse_models_and_datasets(config):
-    models = parse_models(config['models'])
-    datasets = parse_dataset(config['datasets'])
+    models = parse_models(config.get('models'))
+    datasets = parse_dataset(config.get('datasets'))
 
     ds_names = set(ds.name for ds in datasets)
     for model in models:

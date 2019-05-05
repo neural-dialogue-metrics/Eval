@@ -53,6 +53,10 @@ class Exporter:
             return obj.tolist()
         elif isinstance(obj, np.bool):
             return bool(obj)
+        elif isinstance(obj, Path):
+            return str(obj)
+        elif hasattr(obj, '__dict__'):
+            return obj.__dict__
         else:
             raise TypeError
 
@@ -71,4 +75,4 @@ class Exporter:
 
     def export_config(self, config):
         config_json = self.save_dir.joinpath(CONFIG_JSON)
-        config_json.write_text(json.dumps(config, default=lambda obj: obj.__dict__))
+        config_json.write_text(json.dumps(config, default=self.default))

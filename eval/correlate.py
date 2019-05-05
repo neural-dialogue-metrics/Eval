@@ -1,4 +1,3 @@
-import json
 import collections
 import json
 import logging
@@ -8,12 +7,15 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from eval.consts import PEARSON
-from eval.consts import SAMPLE_SIZE, RANDOM_STATE, SEPARATOR, ALL_METHODS
-from eval.repo import get_model, get_dataset
 from pandas import ExcelWriter
 from pandas.plotting import scatter_matrix
 from sklearn.preprocessing import scale as sklearn_scale
+
+from scipy import stats
+
+from eval.consts import PEARSON
+from eval.consts import SAMPLE_SIZE, RANDOM_STATE, SEPARATOR, ALL_METHODS
+from eval.repo import get_model, get_dataset
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +58,7 @@ class UtterScoreDist:
 
     def plot_dist(self):
         data = scale_and_sample(pd.Series(self.utterance))
-        return sns.distplot(data)
+        return sns.distplot(data, fit=stats.norm)
 
 
 DATA_FILENAME_RE = re.compile(r'\w+-\w+-\w+\.json')
