@@ -69,7 +69,7 @@ class ResourceLoader:
         source, format = self.get_load_info(key, requires)
         logger.info('source: {}, format: {}'.format(source, format))
 
-        filename = getattr(under_test, key)
+        filename = getattr(getattr(under_test, source), key)
         if filename in self.loaded_resources:
             return self.loaded_resources[filename]
 

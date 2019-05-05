@@ -280,17 +280,24 @@ class LSDSCCScore(MetricWrapper):
     }
 
     def __init__(self, aligner=None, refset=None):
-        self.aligner = self.aligner_map.get(aligner)
+        aligner_cls = self.aligner_map.get(aligner)
+        self.aligner = aligner_cls() if aligner_cls else None
         self.refset = refset
 
     def __call__(self, multi_responses, references):
-        assert isinstance(multi_responses, lsdscc.HypothesisSet)
-        utterance = lsdscc.compute_score_on_hypothesis_set(
-            hypothesis_set=multi_responses,
-            reference_set=references,
+        utterance = [
+            lsdscc.compute_score_on_hypothesis_set(
+                hypothesis_set=h,
+                reference_set=r,
+                aligner=self.aligner,
+            ) for h, r in zip(multi_responses, references)
+        ]
+        system = lsdscc.compute_score_on_corpus(
+            hypothesis_corpus=multi_responses,
+            reference_corpus=references,
             aligner=self.aligner,
         )
-        return utterance, None
+        return utterance, system
 
     @property
     def references(self):
@@ -298,4 +305,4 @@ class LSDSCCScore(MetricWrapper):
 
     @classmethod
     def parse_config(cls, config):
-        return cls(config.get('aligner'), config.get('refset'))
+        yield cls(config.get('aligner'), config.get('refset'))
