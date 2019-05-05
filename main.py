@@ -13,7 +13,7 @@ if __name__ == '__main__':
     if args.config:
         config = load_config(args.config)
     else:
-        from eval.config import config
+        from repo import config
 
     engine = Engine(config, args.prefix, args.force)
     engine.run()
