@@ -60,3 +60,5 @@ METEOR_ROOT = '/home/cgsdfc/deployment/Metrics/METEOR/meteor-1.5'
 
 # lsdscc
 MULTI_RESPONSES = 'multi_responses'
+
+TEST_DIALOGUES = 'test_dialogues'

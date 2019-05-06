@@ -10,6 +10,7 @@ import lsdscc
 import rouge
 from distinct_n import distinct_n_sentence_level
 from eval.consts import *
+from eval.utils import load_template
 
 logger = logging.getLogger(__name__)
 metrics_classes = {}
@@ -52,6 +53,9 @@ class MetricWrapper:
     @classmethod
     def parse_config(cls, config):
         yield cls()
+
+    def compatible(self, model, dataset):
+        return True
 
 
 @register_metric
@@ -307,3 +311,52 @@ class LSDSCCScore(MetricWrapper):
     @classmethod
     def parse_config(cls, config):
         yield cls(config.get('aligner'), config.get('refset'))
+
+    def compatible(self, model, dataset):
+        return hasattr(model, MULTI_RESPONSES) and dataset == 'lsdscc'
+
+
+@register_metric
+class SerbanModelPPLScore(MetricWrapper):
+    name = 'serban_ppl'
+
+    SERBAN_MODELS = ('hred', 'vhred', 'lstm')
+
+    # utterance word-perplexity = 71.5183944320154
+    UTTER_PPL_RE = re.compile(r'^utterance word-perplexity = (.*)$', flags=re.MULTILINE)
+    SYS_PPL_RE = re.compile(r'system word-perplexity = (.*)')
+
+    TEMPLATE = load_template(name)
+
+    requires = {
+        TEST_DIALOGUES: ('metric.test_dialogues', 'filename'),
+    }
+
+    def __init__(self, model_id, remove_stopwords=False):
+        self.model_id = Path(model_id)
+        self.save_dir = self.model_id.parent
+        self.model_prefix = self.model_id.name
+        self.remove_stopwords = remove_stopwords
+
+    def compatible(self, model, dataset):
+        return model.name in self.SERBAN_MODELS and hasattr(dataset, self.TEST_DIALOGUES)
+
+    def __call__(self, test_dialogues):
+        cmd = self.TEMPLATE.format(
+            model_prefix=self.model_prefix,
+            save_dir=self.save_dir,
+            test_path=test_dialogues,
+            remove_stopwords='-e' if self.remove_stopwords else '',
+        )
+        text = subprocess.check_output(cmd, shell=True, universal_newlines=True)
+        utterance = list(map(float, self.UTTER_PPL_RE.findall(text)))
+        system = float(self.SYS_PPL_RE.search(text).group(1))
+        return utterance, system
+
+    @classmethod
+    def parse_config(cls, config):
+        for model_id in config['model_ids']:
+            yield cls(
+                model_id=model_id,
+                remove_stopwords=config.get('remove_stopwords')
+            )

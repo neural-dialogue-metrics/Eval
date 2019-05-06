@@ -42,8 +42,7 @@ def parse_dataset(config):
         return config
     dataset = []
     for name, value in config.items():
-        dataset.append(Dataset(name=name,
-                               contexts=value[CONTEXTS], references=value[REFERENCES]))
+        dataset.append(Dataset(name=name, **value))
     return dataset
 
 

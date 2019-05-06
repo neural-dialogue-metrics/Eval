@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 
-from eval.consts import CONTEXTS, REFERENCES, SERBAN_UBUNTU_MODEL_DIR
+from eval.consts import *
 from eval.utils import Dataset, Model, model_path
 
 
@@ -17,11 +17,7 @@ def get_dataset(name):
         params = all_datasets[name]
     except KeyError as e:
         raise ValueError('unknown dataset: {}'.format(name)) from e
-    return Dataset(
-        name=name,
-        references=params[REFERENCES],
-        contexts=params[CONTEXTS],
-    )
+    return Dataset(name=name, **params)
 
 
 def get_config(models=None, datasets=None, metrics=None):
@@ -71,10 +67,12 @@ all_datasets = {
     'ubuntu': {
         CONTEXTS: '/home/cgsdfc/UbuntuDialogueCorpus/ResponseContextPairs/raw_testing_contexts.txt',
         REFERENCES: '/home/cgsdfc/UbuntuDialogueCorpus/ResponseContextPairs/raw_testing_responses.txt',
+        TEST_DIALOGUES: '/home/cgsdfc/UbuntuDialogueCorpus/Test.dialogues.pkl',
     },
     'opensub': {
         CONTEXTS: '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/eval/test.context.txt',
         REFERENCES: '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/eval/test.response.txt',
+        TEST_DIALOGUES: '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/eval/test.dialogues.pkl',
     }
 }
 

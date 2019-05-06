@@ -41,10 +41,11 @@ class Model:
 
 
 class Dataset:
-    def __init__(self, name, contexts, references):
+    def __init__(self, name, contexts, references, **kwargs):
         self.name = name
         self.contexts = contexts
         self.references = references
+        self.__dict__.update(kwargs)
 
     def __repr__(self):
         return '<{} {}>'.format(self.__class__.__qualname__, self.name)
@@ -87,3 +88,8 @@ class UnderTest:
 
     def get_resource_file(self, key):
         return eval('self.{}'.format(key))
+
+
+def load_template(name):
+    filename = Path(__file__).with_name('template').joinpath(name)
+    return filename.read_text()
