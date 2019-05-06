@@ -1,5 +1,4 @@
 import traceback
-from collections import Sequence
 import embedding_based as eb
 import logging
 
@@ -41,7 +40,7 @@ class ResourceLoader:
 
     def load_requires(self, under_test):
         requires = under_test.metric.requires
-        if isinstance(requires, Sequence):
+        if isinstance(requires, (list, tuple)):
             # only keys are listed.
             load_info = default_load_info
         elif isinstance(requires, dict):
@@ -67,7 +66,7 @@ class ResourceLoader:
             return self.requires_cache[cache_key]
 
         value = load_info_map[key]
-        if isinstance(value, Sequence):
+        if isinstance(value, (tuple, list)):
             source, format = value
         elif isinstance(value, str):
             format = value

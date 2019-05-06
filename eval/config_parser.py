@@ -63,6 +63,10 @@ def parse_models_and_datasets(config):
     models = parse_models(config.get('models'))
     datasets = parse_dataset(config.get('datasets'))
 
+    return product_models_datasets(datasets, models)
+
+
+def product_models_datasets(datasets, models):
     return [
         (model, dataset) for model, dataset in itertools.product(models, datasets)
         if model.trained_on == dataset.name
