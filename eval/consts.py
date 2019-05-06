@@ -61,4 +61,10 @@ METEOR_ROOT = '/home/cgsdfc/deployment/Metrics/METEOR/meteor-1.5'
 # lsdscc
 MULTI_RESPONSES = 'multi_responses'
 
+# serban ppl
+SERBAN_MODEL_ROOT = '/home/cgsdfc/SavedModels/HRED-VHRED'
+SERBAN_RESULT_ROOT = '/home/cgsdfc/Result/HRED-VHRED'
+
 TEST_DIALOGUES = 'test_dialogues'
+
+MODEL_WEIGHTS = 'model_weights'

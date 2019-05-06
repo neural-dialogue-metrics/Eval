@@ -18,26 +18,15 @@ def ruber_data(train_dir, data_dir, embedding):
     }
 
 
-def model_path(response_path):
-    parts = Path(response_path).parts
-    assert parts[-1].endswith('.txt'), 'path not pointing to valid output.txt'
-    dataset, model = parts[-3:-1]
-    return Model(
-        name=model.lower(),
-        trained_on=dataset.lower(),
-        responses=response_path,
-    )
-
-
 class Model:
-    def __init__(self, name, trained_on, responses):
+    def __init__(self, name, trained_on, responses, **kwargs):
         self.name = name
         self.trained_on = trained_on
         self.responses = responses
+        self.__dict__.update(kwargs)
 
-    def __repr__(self):
-        return '<{} {} on {}>'.format(
-            self.__class__.__qualname__, self.name, self.trained_on)
+    def __str__(self):
+        return f'Model: {self.name}, {self.trained_on}'
 
 
 class Dataset:
@@ -93,3 +82,9 @@ class UnderTest:
 def load_template(name):
     filename = Path(__file__).with_name('template').joinpath(name)
     return filename.read_text()
+
+
+def subdirs(path: Path):
+    for file in path.iterdir():
+        if file.is_dir():
+            yield file

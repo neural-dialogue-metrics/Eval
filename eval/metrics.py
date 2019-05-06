@@ -329,25 +329,21 @@ class SerbanModelPPLScore(MetricWrapper):
     TEMPLATE = load_template(name)
 
     requires = {
-        TEST_DIALOGUES: ('metric.test_dialogues', 'filename'),
+        TEST_DIALOGUES: ('dataset.test_dialogues', 'filename'),
+        MODEL_WEIGHTS: ('model.weights', 'path'),
     }
 
-    def __init__(self, model_id, remove_stopwords=False):
-        self.model_id = Path(model_id)
-        self.save_dir = self.model_id.parent
-        self.model_prefix = self.model_id.name
+    def __init__(self, remove_stopwords=False):
         self.remove_stopwords = remove_stopwords
 
-    def compatible(self, model, dataset):
-        return model.name in self.SERBAN_MODELS and hasattr(dataset, self.TEST_DIALOGUES)
-
-    def __call__(self, test_dialogues):
+    def __call__(self, model_weights: Path, test_dialogues: Path):
         cmd = self.TEMPLATE.format(
-            model_prefix=self.model_prefix,
-            save_dir=self.save_dir,
+            model_prefix=model_weights.name,
+            save_dir=model_weights.parent,
             test_path=test_dialogues,
             remove_stopwords='-e' if self.remove_stopwords else '',
         )
+        logger.info('cmd: {}'.format(cmd))
         text = subprocess.check_output(cmd, shell=True, universal_newlines=True)
         utterance = list(map(float, self.UTTER_PPL_RE.findall(text)))
         system = float(self.SYS_PPL_RE.search(text).group(1))
@@ -355,8 +351,12 @@ class SerbanModelPPLScore(MetricWrapper):
 
     @classmethod
     def parse_config(cls, config):
-        for model_id in config['model_ids']:
-            yield cls(
-                model_id=model_id,
-                remove_stopwords=config.get('remove_stopwords')
-            )
+        yield cls(
+            remove_stopwords=config.get('remove_stopwords')
+        )
+
+    @property
+    def fullname(self):
+        if self.remove_stopwords:
+            return self.name + '_no_stopwords'
+        return self.name

@@ -21,6 +21,7 @@ loader_fns = {
     'token_list': eb.load_corpus_from_file,
     'embeddings': eb.load_word2vec_binary,
     'filename': load_filename,
+    'path': lambda s: Path(s),
 }
 
 default_load_info = {
