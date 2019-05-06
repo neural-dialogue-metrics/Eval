@@ -109,18 +109,10 @@ def find_serban_models(model_root=SERBAN_MODEL_ROOT, result_root=SERBAN_RESULT_R
 
 
 all_models = [
-    model_path('/home/cgsdfc/Result/HRED-VHRED/Ubuntu/VHRED/output.txt',
-               weights='/home/cgsdfc/SavedModels/HRED-VHRED/Ubuntu/VHRED/UbuntuModel'),
-
-    model_path('/home/cgsdfc/Result/HRED-VHRED/Ubuntu/LSTM/output.txt',
-               weights='/home/cgsdfc/SavedModels/HRED-VHRED/Ubuntu/LSTM/1556265276.0421634_UbuntuModel'),
-
-    model_path('/home/cgsdfc/Result/HRED-VHRED/Ubuntu/HRED/output.txt',
-               weights='/home/cgsdfc/SavedModels/HRED-VHRED/Ubuntu/HRED/1554192029.6059802_UbuntuModel'),
-
-    model_path('/home/cgsdfc/Result/HRED-VHRED/Opensub/HRED/output.txt',
-               weights=''),
-
+    model_path('/home/cgsdfc/Result/HRED-VHRED/Ubuntu/VHRED/output.txt'),
+    model_path('/home/cgsdfc/Result/HRED-VHRED/Ubuntu/LSTM/output.txt'),
+    model_path('/home/cgsdfc/Result/HRED-VHRED/Ubuntu/HRED/output.txt'),
+    model_path('/home/cgsdfc/Result/HRED-VHRED/Opensub/HRED/output.txt'),
     model_path('/home/cgsdfc/Result/HRED-VHRED/Opensub/LSTM/output.txt'),
     model_path('/home/cgsdfc/Result/HRED-VHRED/Opensub/VHRED/output.txt'),
 ]
@@ -135,6 +127,11 @@ all_datasets = {
         CONTEXTS: '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/eval/test.context.txt',
         REFERENCES: '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/eval/test.response.txt',
         TEST_DIALOGUES: '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/eval/test.dialogues.pkl',
+    },
+    'lsdscc': {
+        CONTEXTS: '/home/cgsdfc/SerbanLSDSCC/raw_test_dialogues.context',
+        REFERENCES: '/home/cgsdfc/SerbanLSDSCC/raw_test_dialogues.response',
+        TEST_DIALOGUES: '/home/cgsdfc/SerbanLSDSCC/vocab_35000/Test.dialogues.pkl',
     }
 }
 

@@ -25,8 +25,8 @@ class Model:
         self.responses = responses
         self.__dict__.update(kwargs)
 
-    def __str__(self):
-        return f'Model: {self.name}, {self.trained_on}'
+    def __repr__(self):
+        return f'Model({self.name}, {self.trained_on})'
 
 
 class Dataset:

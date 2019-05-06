@@ -9,8 +9,10 @@ TEST_PATH={test_path}
 SAVE_DIR={save_dir}
 
 docker run --rm -it --runtime nvidia \
+    --name serban_ppl \
     -v $HOME:$HOME \
     -w $SERBAN_ROOT \
     -e PYTHONPATH=$SERBAN_ROOT \
     -e THEANO_FLAGS=device=cuda$GPU_INDEX \
+    $SERBAN_IMAGE \
     python bin/evaluate.py $MODEL_PREFIX  --test-path $TEST_PATH --save-dir $SAVE_DIR {remove_stopwords}

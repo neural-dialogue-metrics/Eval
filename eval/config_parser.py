@@ -63,11 +63,6 @@ def parse_models_and_datasets(config):
     models = parse_models(config.get('models'))
     datasets = parse_dataset(config.get('datasets'))
 
-    ds_names = set(ds.name for ds in datasets)
-    for model in models:
-        if model.trained_on not in ds_names:
-            raise ValueError('model {} trained on unknown dataset {}'.format(model.name, model.trained_on))
-
     return [
         (model, dataset) for model, dataset in itertools.product(models, datasets)
         if model.trained_on == dataset.name
