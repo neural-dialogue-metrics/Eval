@@ -144,7 +144,11 @@ all_metrics = {
         'alpha': 0.9,
         'weight': 1.2,
         'n': [1, 2, 3, 4],
-        'variants': ['rouge_n'],
+        'variants': [
+            'rouge_n',
+            'rouge_l',
+            'rouge_w',
+        ],
     },
     'distinct_n': {
         'n': [1, 2]

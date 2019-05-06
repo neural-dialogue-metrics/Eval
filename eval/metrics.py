@@ -150,7 +150,8 @@ class RougeScore(MetricWrapper):
         utterance = [
             self.sentence_level(sum, ref) for sum, ref in zip(responses, references)
         ]
-        system = self.corpus_level(responses, references)
+        # system = self.corpus_level(responses, references)
+        system = None
         return utterance, system
 
     @classmethod

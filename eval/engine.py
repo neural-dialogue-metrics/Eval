@@ -51,3 +51,4 @@ class Engine:
                 logging.warning('interrupted, skipping...')
             else:
                 self.exporter.export_json(result, under_test)
+        logger.info('all done')

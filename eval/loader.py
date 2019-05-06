@@ -1,5 +1,5 @@
 import traceback
-
+from collections import Sequence
 import embedding_based as eb
 import logging
 
@@ -41,30 +41,33 @@ class ResourceLoader:
 
     def load_requires(self, under_test):
         requires = under_test.metric.requires
-        if isinstance(requires, (list, tuple)):
+        if isinstance(requires, Sequence):
             # only keys are listed.
-            known_loader = default_load_info
+            load_info = default_load_info
         elif isinstance(requires, dict):
             # detailed loader info of keys are given.
-            known_loader = requires
+            load_info = requires
         else:
             raise TypeError('invalid type for requires: {}'.format(type(requires)))
 
-        try:
-            return {key: self.load_for_key(key, under_test, known_loader) for key in requires}
-        except Exception:
-            traceback.print_exc()
-            logging.warning('Exception when loading requires')
-            return None
+        resources = {}
+        for key in requires:
+            data = self.load_for_key(key, under_test, load_info)
+            if data is None:
+                logger.warning('resource {} unavailable'.format(key))
+                return None
+            resources[key] = data
+        return resources
 
-    def get_load_info(self, key, requires):
+    def get_load_info(self, key, load_info_map):
         # find out how to load a key in a requires.
-        cache_key = (key, id(requires))
+        # load_info = (source, format) and it is metric-neutral.
+        cache_key = (key, id(load_info_map))
         if cache_key in self.requires_cache:
             return self.requires_cache[cache_key]
 
-        value = requires[key]
-        if isinstance(value, (tuple, list)):
+        value = load_info_map[key]
+        if isinstance(value, Sequence):
             source, format = value
         elif isinstance(value, str):
             format = value
@@ -80,9 +83,9 @@ class ResourceLoader:
             raise TypeError('invalid type for format: {}'.format(type(format)))
         return self.requires_cache.setdefault(cache_key, (source, load_fn))
 
-    def load_for_key(self, key, under_test, requires):
-        assert isinstance(requires, dict)
-        source, load_fn = self.get_load_info(key, requires)
+    def load_for_key(self, key, under_test, load_info_map):
+        assert isinstance(load_info_map, dict)
+        source, load_fn = self.get_load_info(key, load_info_map)
         logger.info('source: {}'.format(source))
         logger.info('load_fn: {}'.format(load_fn))
 
@@ -90,5 +93,10 @@ class ResourceLoader:
         if filename in self.loaded_resources:
             return self.loaded_resources[filename]
 
-        resource = load_fn(filename)
+        try:
+            resource = load_fn(filename)
+        except Exception:
+            traceback.print_exc()
+            logging.warning('Exception when loading requires')
+            resource = None
         return self.loaded_resources.setdefault(filename, resource)
