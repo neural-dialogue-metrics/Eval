@@ -82,7 +82,8 @@ class ResourceLoader:
     def load_for_key(self, key, under_test, requires):
         assert isinstance(requires, dict)
         source, load_fn = self.get_load_info(key, requires)
-        logger.info('source: {}, format: {}'.format(source, format))
+        logger.info('source: {}'.format(source))
+        logger.info('load_fn: {}'.format(load_fn))
 
         filename = under_test.get_resource_file(source)
         if filename in self.loaded_resources:

@@ -269,8 +269,9 @@ class LSDSCCScore(MetricWrapper):
     utterance_field = ('max_bleu', 'pds', 'mds')
 
     requires = {
-        MULTI_RESPONSES: ('model.multi_response', lsdscc.HypothesisSet.load_corpus),
-        REFERENCES: lsdscc.ReferenceSet.load_json_corpus,
+        # key, source, load_fn.
+        MULTI_RESPONSES: ('model.multi_responses', lsdscc.HypothesisSet.load_corpus),
+        REFERENCES: ('metric.references', lsdscc.ReferenceSet.load_json_corpus),
     }
 
     from lsdscc.align import NLTKBleuAligner, NLTKNistAligner
