@@ -62,7 +62,6 @@ def parse_models(config):
 def parse_models_and_datasets(config):
     models = parse_models(config.get('models'))
     datasets = parse_dataset(config.get('datasets'))
-
     return product_models_datasets(datasets, models)
 
 

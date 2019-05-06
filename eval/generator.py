@@ -47,7 +47,10 @@ def train_and_sample_scripts(output_dir: Path):
         'sample': get_sample,
     }
 
-    for model, dataset in product_models_datasets(parse_dataset(all_datasets), find_serban_models()):
+    datasets = parse_dataset(all_datasets)
+    models = find_serban_models()
+
+    for model, dataset in product_models_datasets(datasets, models):
         for name, gen_fn in scripts_map.items():
             script = output_dir.joinpath('_'.join((model.name, dataset.name, name))).with_suffix('.sh')
             logger.info('new script: {}'.format(script))

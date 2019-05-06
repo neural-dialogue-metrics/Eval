@@ -16,7 +16,6 @@ class Engine:
         self.loader = ResourceLoader()
         self.config = config
         self.force = force
-
         self.under_tests = self.parse_config(config)
 
     def parse_config(self, config):
