@@ -137,13 +137,13 @@ all_datasets = {
 
 all_metrics = {
     'bleu': {
-        'n': [4],
+        'n': [1, 2, 3, 4],
         'smoothing': True,
     },
     'rouge': {
         'alpha': 0.9,
         'weight': 1.2,
-        'n': [2],
+        'n': [1, 2, 3, 4],
         'variants': ['rouge_n'],
     },
     'distinct_n': {
@@ -156,6 +156,10 @@ all_metrics = {
             'greedy_matching',
         ],
     },
+    'adem': {},
+    'meteor': {},
+    'serban_ppl': {},
+    'utterance_len': {},
 }
 
 default_config = {
