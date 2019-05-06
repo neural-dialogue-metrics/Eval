@@ -85,18 +85,5 @@ class UnderTest:
             raise ValueError('{!r} is not allowed in names'.format(SEPARATOR))
         return SEPARATOR.join(parts)
 
-    @property
-    def contexts(self):
-        return self.dataset.contexts
-
-    @property
-    def references(self):
-        return self.dataset.references
-
-    @property
-    def responses(self):
-        return self.model.responses
-
-    @property
-    def embeddings(self):
-        return getattr(self.metric, 'embeddings_file')
+    def get_resource_file(self, key):
+        return eval('self.{}'.format(key))

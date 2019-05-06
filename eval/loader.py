@@ -1,3 +1,5 @@
+import traceback
+
 import embedding_based as eb
 import logging
 
@@ -21,15 +23,16 @@ loader_fns = {
     'filename': load_filename,
 }
 
+default_load_info = {
+    # key, source, format.
+    RESPONSES: ('model.responses', 'token_list'),
+    CONTEXTS: ('dataset.contexts', 'token_list'),
+    REFERENCES: ('dataset.references', 'token_list'),
+    EMBEDDINGS: ('metric.embeddings_file', 'embeddings'),
+}
+
 
 class ResourceLoader:
-    default_load_info = {
-        # key, source, format.
-        RESPONSES: ('model', 'token_list'),
-        CONTEXTS: ('dataset', 'token_list'),
-        REFERENCES: ('dataset', 'token_list'),
-        EMBEDDINGS: ('metric', 'embeddings'),
-    }
 
     def __init__(self):
         self.loaded_resources = {}
@@ -39,13 +42,19 @@ class ResourceLoader:
         requires = under_test.metric.requires
         if isinstance(requires, (list, tuple)):
             # only keys are listed.
-            known_loader = self.default_load_info
+            known_loader = default_load_info
         elif isinstance(requires, dict):
             # detailed loader info of keys are given.
             known_loader = requires
         else:
             raise TypeError('invalid type for requires: {}'.format(type(requires)))
-        return {key: self.load_for_key(key, under_test, known_loader) for key in requires}
+
+        try:
+            return {key: self.load_for_key(key, under_test, known_loader) for key in requires}
+        except Exception:
+            traceback.print_exc()
+            logging.warning('Exception when loading requires')
+            return None
 
     def get_load_info(self, key, requires):
         # find out how to load a key in a requires.
@@ -58,20 +67,9 @@ class ResourceLoader:
             source, format = value
         elif isinstance(value, str):
             format = value
-            # fell back.
-            source = self.default_load_info[key][0]
+            source = default_load_info[key][0]
         else:
             raise TypeError('invalid type: {}'.format(type(value)))
-        return self.requires_cache.setdefault(cache_key, (source, format))
-
-    def load_for_key(self, key, under_test, requires):
-        assert isinstance(requires, dict)
-        source, format = self.get_load_info(key, requires)
-        logger.info('source: {}, format: {}'.format(source, format))
-
-        filename = getattr(getattr(under_test, source), key)
-        if filename in self.loaded_resources:
-            return self.loaded_resources[filename]
 
         if callable(format):
             load_fn = format
@@ -79,5 +77,16 @@ class ResourceLoader:
             load_fn = loader_fns[format]
         else:
             raise TypeError('invalid type for format: {}'.format(type(format)))
+        return self.requires_cache.setdefault(cache_key, (source, load_fn))
+
+    def load_for_key(self, key, under_test, requires):
+        assert isinstance(requires, dict)
+        source, load_fn = self.get_load_info(key, requires)
+        logger.info('source: {}, format: {}'.format(source, format))
+
+        filename = under_test.get_resource_file(source)
+        if filename in self.loaded_resources:
+            return self.loaded_resources[filename]
+
         resource = load_fn(filename)
         return self.loaded_resources.setdefault(filename, resource)

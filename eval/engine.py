@@ -27,13 +27,6 @@ class Engine:
             for metric, (model, dataset) in itertools.product(metrics, models_and_datasets)
         ]
 
-    def load_resources(self, under_test):
-        try:
-            return self.loader.load_requires(under_test)
-        except FileNotFoundError as e:
-            logger.warning('File not found: %s, skipping...', e.filename)
-            return None
-
     def run(self):
         logger.info('save_dir: %s', self.exporter.save_dir)
         logger.info('config: %s', pprint.pformat(self.config))
@@ -47,7 +40,7 @@ class Engine:
 
             logger.info('Running under_test: %r', under_test)
             logger.info('Loading resources: %s', ', '.join(under_test.metric.requires))
-            payload = self.load_resources(under_test)
+            payload = self.loader.load_requires(under_test)
             if payload is None:
                 continue
 
