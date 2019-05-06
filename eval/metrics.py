@@ -1,6 +1,6 @@
+import logging
 import re
 import subprocess
-import logging
 from pathlib import Path
 
 from nltk.translate.bleu_score import sentence_bleu, corpus_bleu, SmoothingFunction
@@ -218,9 +218,9 @@ class ADEMScore(MetricWrapper):
         RESPONSES: 'filename',
     }
 
-    from eval.consts import ADEM_TEMPLATE_FILE, ADEM_IMAGE, ADEM_ROOT, ADEM_OUTPUT_FILE
+    from eval.consts import ADEM_IMAGE, ADEM_ROOT, ADEM_OUTPUT_FILE
     OUTPUT_FILE = Path(ADEM_ROOT).joinpath(ADEM_OUTPUT_FILE)
-    TEMPLATE = Path(__file__).with_name(ADEM_TEMPLATE_FILE).read_text()
+    TEMPLATE = load_template(name)
 
     def __call__(self, contexts, references, responses):
         cmd = self.TEMPLATE.format(
@@ -249,8 +249,9 @@ class METEORScore(MetricWrapper):
     # Final score:            0.1634213080811731
     SYSTEM_SCORE_RE = re.compile(r'Final score:\s+(.*)')
 
-    from eval.consts import METEOR_TEMPLATE_FILE, METEOR_JAR_FILE, METEOR_ROOT
-    TEMPLATE = Path(__file__).with_name(METEOR_TEMPLATE_FILE).read_text()
+    from eval.consts import METEOR_JAR_FILE
+    METEOR_JAR_FILE = Path(METEOR_JAR_FILE)
+    TEMPLATE = load_template(name)
 
     def __call__(self, references, responses):
         cmd = self.TEMPLATE.format(
@@ -259,7 +260,8 @@ class METEORScore(MetricWrapper):
             responses=responses,
         )
         logger.info('cmd: {}'.format(cmd))
-        text = subprocess.check_output(cmd, shell=True, cwd=self.METEOR_ROOT, universal_newlines=True)
+        text = subprocess.check_output(cmd,
+                                       shell=True, cwd=self.METEOR_JAR_FILE.parent, universal_newlines=True)
         utterance = self.SEGMENT_SCORE_RE.findall(text)
         utterance = list(map(float, utterance))
         system = self.SYSTEM_SCORE_RE.search(text)

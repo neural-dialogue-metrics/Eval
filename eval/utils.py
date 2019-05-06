@@ -80,7 +80,7 @@ class UnderTest:
 
 
 def load_template(name):
-    filename = Path(__file__).with_name('template').joinpath(name)
+    filename = Path(__file__).with_name('template').joinpath(name).with_suffix('.sh')
     return filename.read_text()
 
 

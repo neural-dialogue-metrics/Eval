@@ -48,15 +48,10 @@ SERBAN_TWITTER_MODEL_DIR = '/home/cgsdfc/TwitterDialogueCorpus/ModelResponses'
 # for ADEM
 ADEM_ROOT = '/home/cgsdfc/deployment/Metrics/AutoTuring/ADEM-1-master'
 ADEM_OUTPUT_FILE = 'adem_output.txt'
-ADEM_TEMPLATE_FILE = 'adem.sh.template'
 ADEM_IMAGE = 'cgsdfc/adem-1-master:latest'
 
 # for meteor
-METEOR_TEMPLATE_FILE = 'meteor.sh.template'
-
-METEOR_JAR_FILE = 'meteor-1.5.jar'
-
-METEOR_ROOT = '/home/cgsdfc/deployment/Metrics/METEOR/meteor-1.5'
+METEOR_JAR_FILE = '/home/cgsdfc/deployment/Metrics/METEOR/meteor-1.5/meteor-1.5.jar'
 
 # lsdscc
 MULTI_RESPONSES = 'multi_responses'
