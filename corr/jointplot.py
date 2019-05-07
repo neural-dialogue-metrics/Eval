@@ -1,15 +1,15 @@
-import traceback
-from pathlib import Path
 import itertools
-from corr.data import DataIndex
 import logging
-from scipy.stats import pearsonr
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import scale
-import seaborn as sns
+import traceback
 import warnings
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy.stats import pearsonr
+from sklearn.preprocessing import scale
+
+from corr.data import DataIndex
 
 warnings.filterwarnings('ignore', r'JointGrid annotation is deprecated')
 from corr.utils import UtterScoreDist
@@ -61,7 +61,6 @@ def plot(data_index: DataIndex, prefix: Path, force=False):
     def plot_for_mode(mode):
         logger.info('plotting for mode {}'.format(mode))
         for key, data in data_index.index.groupby(['dataset', mode]):
-            ds, mode_arg = key
             triples = list(data.itertuples(index=False, name='Triple'))
             pairs = cn_2(triples)
             for x, y in pairs:
@@ -74,12 +73,13 @@ def plot(data_index: DataIndex, prefix: Path, force=False):
                         output.stat().st_mtime > src.stat().st_mtime for src in sources):
                     logger.info('up to date: {}'.format(output))
                     continue
-                x = data_index.get_data(x.filename)
-                y = data_index.get_data(y.filename)
                 try:
-                    do_plot(x, y, mode, output)
+                    do_plot(x=data_index.get_data(x.filename),
+                            y=data_index.get_data(y.filename), mode=mode, output=output)
                 except Exception:
                     traceback.print_exc()
+                    logging.info('x: {}'.format(x))
+                    logging.info('y: {}'.format(y))
 
     plot_for_mode(MODE_MODEL)
     plot_for_mode(MODE_METRIC)

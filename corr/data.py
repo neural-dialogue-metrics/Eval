@@ -14,7 +14,7 @@ class DataIndex:
 
     @property
     def index(self):
-        if not self._index:
+        if self._index is None:
             self._index = load_filename_data(self.data_dir)
         return self._index
 
