@@ -58,5 +58,11 @@ docs/_build/
 target/
 configs/
 save/
+plots/
+notebook/
+paper/
+tmp/
+
+# figures
 *.png
 *.svg

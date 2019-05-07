@@ -14,6 +14,9 @@ setup(
         'computational linguistics',
         'machine translation',
     ],
+    scripts=[
+        'bin/eval_main.py',
+    ],
     packages=[
         'eval',
         'corr',
