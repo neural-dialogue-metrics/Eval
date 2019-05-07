@@ -75,6 +75,7 @@ class ResourceLoader:
                     requires[key] = source, normalize_format(format)
             else:
                 raise TypeError('invalid type for requires')
+            return requires
 
         requires = do_normalize()
         return self.requires_cache.setdefault(requires_key, requires)

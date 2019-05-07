@@ -334,7 +334,7 @@ class SerbanModelPPLScore(MetricWrapper):
 
     requires = {
         TEST_DIALOGUES: ('dataset.test_dialogues', 'filename'),
-        MODEL_WEIGHTS: ('model.weights', 'path'),
+        MODEL_WEIGHTS: ('model.weights', 'filename'),
     }
 
     def __init__(self, remove_stopwords=False):
@@ -342,7 +342,7 @@ class SerbanModelPPLScore(MetricWrapper):
 
     def __call__(self, model_weights: Path, test_dialogues: Path):
         cmd = self.TEMPLATE.format(
-            model_prefix=model_weights.name,
+            model_prefix=model_weights.name.replace('_model.npz', ''),
             save_dir=model_weights.parent,
             test_path=test_dialogues,
             remove_stopwords='-e' if self.remove_stopwords else '',

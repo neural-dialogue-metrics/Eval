@@ -72,26 +72,26 @@ class SerbanModelFinder:
 
     def find_latest_model(self, model_dir):
         model_suffix = self.SUFFIXES[0]
-        npz_files = list(model_dir.glob('*' + model_suffix))
-        if not npz_files:
+        model_files = list(model_dir.glob('*' + model_suffix))
+        if not model_files:
             raise ValueError('no model file found in {}'.format(model_dir))
-        npz_files = list(filter(lambda file: '_auto_' not in file.name, npz_files))
-        npz_files = sorted(npz_files, key=lambda file: file.stat().st_mtime, reverse=True)
-        latest_npz: Path = npz_files[0]
-        logger.info('Found latest npz file: {}'.format(latest_npz))
+        model_files = list(filter(lambda file: '_auto_' not in file.name, model_files))
+        model_files = sorted(model_files, key=lambda file: file.stat().st_mtime, reverse=True)
+        latest_model: Path = model_files[0]
+        logger.info('Found latest npz file: {}'.format(latest_model))
 
-        model_id = latest_npz.name.replace(model_suffix, '')
-        model_prefix = latest_npz.with_name(model_id)
+        model_id = latest_model.name.replace(model_suffix, '')
+        model_prefix = latest_model.with_name(model_id)
         for suffix in self.SUFFIXES:
             file = model_prefix.with_name(model_id + suffix)
             if not file.exists():
                 raise ValueError('file {} does not exist'.format(file))
-        return model_prefix
+        return latest_model
 
     def find_models(self):
         for dataset_dir in subdirs(self.model_root):
             for model_dir in subdirs(dataset_dir):
-                model_prefix = self.find_latest_model(model_dir)
+                weights = self.find_latest_model(model_dir)
                 output_file = self.result_root.joinpath(
                     dataset_dir.name).joinpath(model_dir.name).joinpath(self.OUTPUT)
                 if not output_file.exists():
@@ -100,7 +100,7 @@ class SerbanModelFinder:
                     name=model_dir.name.lower(),
                     trained_on=dataset_dir.name.lower(),
                     responses=output_file,
-                    weights=model_prefix,
+                    weights=weights,
                 )
 
 

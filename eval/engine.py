@@ -33,6 +33,8 @@ class Engine:
             return True
         filenames = self.loader.get_filenames(under_test).values()
         for file in filenames:
+            if not file.exists():
+                return True
             if file.stat().st_mtime > output.stat().st_mtime:
                 logger.info('file {} is newer than {}'.format(file, output))
                 return True
@@ -61,4 +63,5 @@ class Engine:
                 logging.warning('interrupted, skipping...')
             else:
                 self.exporter.export_json(result, under_test)
+        logger.info('run {} under_tests'.format(len(self.under_tests)))
         logger.info('all done')
