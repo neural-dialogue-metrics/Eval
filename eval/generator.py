@@ -19,22 +19,24 @@ def get_prototype(model, dataset):
     return f'prototype_{dataset_name}_{model.name.upper()}'
 
 
-def get_train(model, dataset):
+def get_train(model, dataset, name):
     save_dir = model.weights.parent
     model_prefix = model.weights.name
     prototype = get_prototype(model, dataset)
     return train_template.format(
+        name=name,
         save_dir=save_dir,
         prototype=prototype,
         model_prefix=model_prefix,
     )
 
 
-def get_sample(model, dataset):
+def get_sample(model, dataset, name):
     model_prefix = model.weights
     context = dataset.contexts
     output = model.responses
     return sample_template.format(
+        name=name,
         model_prefix=model_prefix,
         context=context,
         output=output,
@@ -54,7 +56,7 @@ def train_and_sample_scripts(output_dir: Path):
         for name, gen_fn in scripts_map.items():
             script = output_dir.joinpath('_'.join((model.name, dataset.name, name))).with_suffix('.sh')
             logger.info('new script: {}'.format(script))
-            script.write_text(gen_fn(model, dataset))
+            script.write_text(gen_fn(model, dataset, script.stem))
 
 
 if __name__ == '__main__':

@@ -9,7 +9,7 @@ TEST_PATH={test_path}
 SAVE_DIR={save_dir}
 
 docker run --rm -it --runtime nvidia \
-    --name serban_ppl \
+    --name {name} \
     -v $HOME:$HOME \
     -w $SERBAN_ROOT \
     -e PYTHONPATH=$SERBAN_ROOT \

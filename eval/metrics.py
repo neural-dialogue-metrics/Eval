@@ -346,6 +346,7 @@ class SerbanModelPPLScore(MetricWrapper):
             save_dir=model_weights.parent,
             test_path=test_dialogues,
             remove_stopwords='-e' if self.remove_stopwords else '',
+            name=self.name,
         )
         logger.info('cmd: {}'.format(cmd))
         text = subprocess.check_output(cmd, shell=True, universal_newlines=True)
