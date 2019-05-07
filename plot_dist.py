@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from eval.correlate import UtterScoreDist
+from corr.correlate import UtterScoreDist
 import argparse
 import matplotlib.pyplot as plt
 

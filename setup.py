@@ -16,6 +16,7 @@ setup(
     ],
     packages=[
         'eval',
+        'corr',
     ],
     classifiers=[
         'Intended Audience :: Science/Research',
@@ -25,5 +26,20 @@ setup(
     ],
     license='LICENCE.txt',
     long_description=open('README.md').read(),
-    install_requires=[]
+    install_requires=[
+        # eval:
+        'numpy',
+        'nltk',
+        'embedding_based',
+        'lsdscc',
+        'rouge',
+        'distinct_n',
+
+        # corr:
+        'seaborn',
+        'matplotlab',
+        'pandas',
+        'sklearn',
+        'scipy',
+    ]
 )

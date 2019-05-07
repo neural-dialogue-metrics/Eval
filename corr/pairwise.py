@@ -8,7 +8,7 @@ from pandas import DataFrame
 from scipy.stats import pearsonr, spearmanr
 
 from eval.consts import PEARSON, SPEARMAN, SEPARATOR, SCATTER_ALPHA
-from eval.correlate import UtterScoreDist, find_all_data_files
+from corr.correlate import UtterScoreDist, find_all_data_files
 
 logger = logging.getLogger(__name__)
 
