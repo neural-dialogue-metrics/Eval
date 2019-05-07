@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import logging
 from pathlib import Path
 import seaborn as sns
@@ -16,4 +17,5 @@ if __name__ == '__main__':
     from corr.distplot import plot
 
     data_index = DataIndex(args.data_dir)
+    logging.info('backend: {}'.format(plt.get_backend()))
     plot(data_index, Path(args.prefix), args.force)
