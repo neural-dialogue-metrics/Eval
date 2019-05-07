@@ -19,7 +19,6 @@ setup(
     ],
     packages=[
         'eval',
-        'corr',
     ],
     classifiers=[
         'Intended Audience :: Science/Research',
@@ -33,16 +32,16 @@ setup(
         # eval:
         'numpy',
         'nltk',
-        'embedding_based',
+        'embeddingbased',
         'lsdscc',
         'rouge',
         'distinct_n',
 
         # corr:
         'seaborn',
-        'matplotlab',
+        'matplotlib',
         'pandas',
-        'sklearn',
+        'scikit-learn',
         'scipy',
     ]
 )

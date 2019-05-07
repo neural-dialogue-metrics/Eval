@@ -22,14 +22,14 @@ def parse_metrics(config):
             if isinstance(m, dict):
                 name = m['name']
                 cls = metrics_classes[name]
-                metrics.extend(cls.parse_config(m))
+                metrics.extend(cls.get_urls(,, m, None)
             else:
                 # assume to be MetricWrapper
                 metrics.append(m)
     elif isinstance(config, dict):
         for name, metric_config in config.items():
             cls = metrics_classes[name]
-            metrics.extend(cls.parse_config(metric_config))
+            metrics.extend(cls.get_urls(,, metric_config, None)
     else:
         raise TypeError('metric config must be a list or a dict')
     return metrics

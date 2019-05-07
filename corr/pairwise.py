@@ -4,11 +4,10 @@ import pprint
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-from pandas import DataFrame
 from scipy.stats import pearsonr, spearmanr
 
-from eval.consts import PEARSON, SPEARMAN, SEPARATOR, SCATTER_ALPHA
-from corr.correlate import UtterScoreDist, find_all_data_files
+from eval.consts import PEARSON, SPEARMAN, SCATTER_ALPHA
+from corr.utils import UtterScoreDist
 
 logger = logging.getLogger(__name__)
 
@@ -37,16 +36,6 @@ def scatter_plot(u: UtterScoreDist, v: UtterScoreDist):
         plt.ylabel(f'{v.model}')
     else:
         raise ValueError('one of (metric, model) must be the same')
-
-
-def load_filename_data(prefix):
-    data_files = find_all_data_files(prefix)
-
-    def parse(path: Path):
-        model, dataset, metric = path.stem.split(SEPARATOR)
-        return locals()
-
-    return DataFrame.from_records([parse(p) for p in data_files])
 
 
 def compute_corr_and_plot_scatter(u: Path, v: Path, output_dir: Path):
