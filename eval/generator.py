@@ -21,7 +21,7 @@ def get_prototype(model, dataset):
 
 def get_train(model, dataset, name):
     save_dir = model.weights.parent
-    model_prefix = model.weights.name
+    model_prefix = model.weights.name.replace('_model.npz', '')
     prototype = get_prototype(model, dataset)
     return train_template.format(
         name=name,
@@ -32,7 +32,7 @@ def get_train(model, dataset, name):
 
 
 def get_sample(model, dataset, name):
-    model_prefix = model.weights
+    model_prefix = model.weights.with_name(model.weights.name.replace('_model.npz', ''))
     context = dataset.contexts
     output = model.responses
     return sample_template.format(
