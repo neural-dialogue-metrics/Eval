@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
-
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.axes import Axes
@@ -20,8 +21,9 @@ def get_output(prefix: Path, triple):
 
 def do_distplot(data, triple, output):
     data = Series(data).transform(scale)
-    fig = plt.figure()
-    ax = plt.subplot()
+    fig = Figure()
+    FigureCanvas(fig)
+    ax = fig.add_subplot(111)
     sns.distplot(data, ax=ax)
     ax.set_title('{} of {} on {}'.format(triple.metric, triple.model, triple.dataset))
     fig.savefig(str(output))
