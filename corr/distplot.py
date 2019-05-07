@@ -2,12 +2,11 @@ import logging
 from pathlib import Path
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
 import seaborn as sns
-from matplotlib.axes import Axes
 from pandas import Series
 from sklearn.preprocessing import scale
 
+from corr.consts import PLOT_FILENAME
 from corr.data import DataIndex
 
 NAME = 'distplot'
@@ -16,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_output(prefix: Path, triple):
-    return prefix / NAME / triple.dataset / triple.model / triple.metric / 'plot.png'
+    return prefix / NAME / triple.dataset / triple.model / triple.metric / PLOT_FILENAME
 
 
 def do_distplot(data, triple, output):

@@ -14,8 +14,8 @@ if __name__ == '__main__':
     sns.set(color_codes=True)
 
     args = parser.parse_args()
-    from corr.distplot import plot
+    from corr.jointplot import plot
 
     data_index = DataIndex(args.data_dir)
-    logging.info('backend: {}'.format(plt.get_backend()))
     plot(data_index, Path(args.prefix), args.force)
+    logging.info('backend: {}'.format(plt.get_backend()))
