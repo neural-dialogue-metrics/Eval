@@ -7,7 +7,8 @@ import pandas as pd
 from pandas import DataFrame
 from sklearn.preprocessing import scale as sklearn_scale
 
-from eval.consts import SAMPLE_SIZE, RANDOM_STATE, SEPARATOR
+from corr.consts import SAMPLE_SIZE, RANDOM_STATE
+from eval.consts import SEPARATOR
 
 logger = logging.getLogger(__name__)
 
@@ -47,9 +48,9 @@ class UtterScoreDist(Triple):
         return cls(**data)
 
 
-def find_all_data_files(dist_dir):
-    dist_dir = Path(dist_dir)
-    data_files = filter(lambda path: DATA_FILENAME_RE.match(path.name), dist_dir.glob('*.json'))
+def find_all_data_files(dir):
+    dir = Path(dir)
+    data_files = filter(lambda path: DATA_FILENAME_RE.match(path.name), dir.glob('*.json'))
     return list(data_files)
 
 
@@ -57,11 +58,12 @@ def is_fully_substituted(url):
     return re.search(r'<[\w_\d]+>', url) is None
 
 
-def load_filename_data(prefix):
-    data_files = find_all_data_files(prefix)
+def load_filename_data(data_dir):
+    logger.info('loading filename data from {}'.format(data_dir))
+    data_files = find_all_data_files(data_dir)
 
-    def parse(path: Path):
-        model, dataset, metric = path.stem.split(SEPARATOR)
+    def parse(filename: Path):
+        model, dataset, metric = filename.stem.split(SEPARATOR)
         return locals()
 
     return DataFrame.from_records([parse(p) for p in data_files])

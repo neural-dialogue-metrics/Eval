@@ -27,9 +27,6 @@ CONFIG_JSON = 'config.json'
 # The char that separates different params: model, dataset and metric.
 SEPARATOR = '-'
 
-SAMPLE_SIZE = 1000
-
-RANDOM_STATE = 1
 
 # Correlation methods in pandas names.
 PEARSON = 'pearson'
