@@ -108,14 +108,7 @@ def find_serban_models(model_root=SERBAN_MODEL_ROOT, result_root=SERBAN_RESULT_R
     return list(SerbanModelFinder(model_root, result_root).find_models())
 
 
-all_models = [
-    model_path('/home/cgsdfc/Result/HRED-VHRED/Ubuntu/VHRED/output.txt'),
-    model_path('/home/cgsdfc/Result/HRED-VHRED/Ubuntu/LSTM/output.txt'),
-    model_path('/home/cgsdfc/Result/HRED-VHRED/Ubuntu/HRED/output.txt'),
-    model_path('/home/cgsdfc/Result/HRED-VHRED/Opensub/HRED/output.txt'),
-    model_path('/home/cgsdfc/Result/HRED-VHRED/Opensub/LSTM/output.txt'),
-    model_path('/home/cgsdfc/Result/HRED-VHRED/Opensub/VHRED/output.txt'),
-]
+all_models = find_serban_models()
 
 all_datasets = {
     'ubuntu': {

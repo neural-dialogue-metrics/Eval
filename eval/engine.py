@@ -10,21 +10,22 @@ from eval.utils import UnderTest
 logger = logging.getLogger(__name__)
 
 
+def parse_config(config):
+    metrics = parse_metrics(config['metrics'])
+    models_and_datasets = parse_models_and_datasets(config)
+    return [
+        UnderTest(metric=metric, model=model, dataset=dataset)
+        for metric, (model, dataset) in itertools.product(metrics, models_and_datasets)
+    ]
+
+
 class Engine:
     def __init__(self, config, save_dir, force=False):
         self.exporter = Exporter(save_dir)
         self.loader = ResourceLoader()
         self.config = config
         self.force = force
-        self.under_tests = self.parse_config(config)
-
-    def parse_config(self, config):
-        metrics = parse_metrics(config['metrics'])
-        models_and_datasets = parse_models_and_datasets(config)
-        return [
-            UnderTest(metric=metric, model=model, dataset=dataset)
-            for metric, (model, dataset) in itertools.product(metrics, models_and_datasets)
-        ]
+        self.under_tests = parse_config(config)
 
     def run(self):
         logger.info('save_dir: %s', self.exporter.save_dir)
@@ -39,7 +40,7 @@ class Engine:
 
             logger.info('Running under_test: %r', under_test)
             logger.info('Loading resources: %s', ', '.join(under_test.metric.requires))
-            payload = self.loader.load_requires(under_test)
+            payload = self.loader.load_resources(under_test)
             if payload is None:
                 continue
 

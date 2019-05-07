@@ -32,65 +32,71 @@ default_load_info = {
 }
 
 
+def normalize_format(format):
+    if callable(format):
+        return format
+    return loader_fns[format]
+
+
 class ResourceLoader:
 
     def __init__(self):
+        # (filename, format) => resource
         self.loaded_resources = {}
+        # (key, id(requires) => source, format
         self.requires_cache = {}
 
-    def load_requires(self, under_test):
-        requires = under_test.metric.requires
-        if isinstance(requires, (list, tuple)):
-            # only keys are listed.
-            load_info = default_load_info
-        elif isinstance(requires, dict):
-            # detailed loader info of keys are given.
-            load_info = requires
-        else:
-            raise TypeError('invalid type for requires: {}'.format(type(requires)))
+    # requires can be a dict or a list.
+    # if list, the item must be key in default_load_info.
+    # if dict, the shape must be similar to default_load_info.
+    # the value can be str or callable or list. if str or callable, it is the format.
+    # and the source can be found in default_load_info with that key.
+    # if list, must be 2 items, the first is the source, the second is the format.
+    def get_normalized_requires(self, dict_or_list):
+        requires_key = id(dict_or_list)
+        if requires_key in self.requires_cache:
+            return self.requires_cache[requires_key]
 
+        requires = {}
+        if isinstance(dict_or_list, dict):
+            for key, value in dict_or_list.items():
+                if isinstance(value, str) or callable(value):
+                    source, format = default_load_info[key][0], value
+                elif isinstance(value, (tuple, list)):
+                    source, format = value
+                else:
+                    raise TypeError('invalid type for requires entry')
+                format = normalize_format(format)
+                requires[key] = source, format
+        elif isinstance(dict_or_list, (list, tuple)):
+            for key in dict_or_list:
+                source, format = default_load_info[key]
+                requires[key] = source, normalize_format(format)
+        else:
+            raise TypeError('invalid type for requires')
+
+        return self.requires_cache.setdefault(requires_key, requires)
+
+    def load_resources(self, under_test):
+        requires = under_test.metric.requires
+        requires = self.get_normalized_requires(requires)
         resources = {}
         for key in requires:
-            data = self.load_for_key(key, under_test, load_info)
+            data = self.load_resource_for_key(key, under_test, requires)
             if data is None:
                 logger.warning('resource {} unavailable'.format(key))
                 return None
             resources[key] = data
         return resources
 
-    def get_load_info(self, key, load_info_map):
-        # find out how to load a key in a requires.
-        # load_info = (source, format) and it is metric-neutral.
-        cache_key = (key, id(load_info_map))
-        if cache_key in self.requires_cache:
-            return self.requires_cache[cache_key]
-
-        value = load_info_map[key]
-        if isinstance(value, (tuple, list)):
-            source, format = value
-        elif isinstance(value, str):
-            format = value
-            source = default_load_info[key][0]
-        else:
-            raise TypeError('invalid type: {}'.format(type(value)))
-
-        if callable(format):
-            load_fn = format
-        elif isinstance(format, str):
-            load_fn = loader_fns[format]
-        else:
-            raise TypeError('invalid type for format: {}'.format(type(format)))
-        return self.requires_cache.setdefault(cache_key, (source, load_fn))
-
-    def load_for_key(self, key, under_test, load_info_map):
-        assert isinstance(load_info_map, dict)
-        source, load_fn = self.get_load_info(key, load_info_map)
-        logger.info('source: {}'.format(source))
-        logger.info('load_fn: {}'.format(load_fn))
-
+    def load_resource_for_key(self, key, under_test, requires):
+        assert isinstance(requires, dict)
+        source, load_fn = requires[key]
         filename = under_test.get_resource_file(source)
-        if filename in self.loaded_resources:
-            return self.loaded_resources[filename]
+
+        resource_key = (filename, format)
+        if resource_key in self.loaded_resources:
+            return self.loaded_resources[resource_key]
 
         try:
             resource = load_fn(filename)
@@ -98,4 +104,16 @@ class ResourceLoader:
             traceback.print_exc()
             logging.warning('Exception when loading requires')
             resource = None
-        return self.loaded_resources.setdefault(filename, resource)
+        return self.loaded_resources.setdefault(resource_key, resource)
+
+    def get_filenames(self, under_test):
+        requires = self.get_normalized_requires(under_test.metric.requires)
+        return {
+            key: Path(under_test.get_resource_file(source))
+            for key, (source, format) in requires.items()
+        }
+
+    def get_filename_for_key(self, key, under_test):
+        requires = self.get_normalized_requires(under_test.metric.requires)
+        source, _ = requires[key]
+        return under_test.get_resource_file(source)

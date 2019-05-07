@@ -14,7 +14,7 @@ if __name__ == '__main__':
     if args.config:
         config = load_config(args.config)
     else:
-        from repo import default_config as config
+        from eval.repo import default_config as config
 
     engine = Engine(config, args.prefix, args.force)
     engine.run()
