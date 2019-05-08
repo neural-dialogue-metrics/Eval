@@ -1,10 +1,10 @@
+import functools
 import logging
 import traceback
+import warnings
 from pathlib import Path
 from typing import Union
 
-import warnings
-import functools
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
@@ -16,14 +16,14 @@ from corr.utils import remake_needed
 NAME = 'pairplot'
 
 GROUP_MAP = {
-    # 'word_overlap': [
-    #     'bleu_4',
-    #     'rouge_2',
-    #     'meteor',
-    # ],
-    # 'rouge': 'all',
-    # 'bleu': 'all',
-    # 'distinct': 'all',
+    'word_overlap': [
+        'bleu_4',
+        'rouge_2',
+        'meteor',
+    ],
+    'rouge': 'all',
+    'bleu': 'all',
+    'distinct': 'all',
     'embedding_based': 'all',
 }
 
@@ -76,6 +76,7 @@ def do_plot(list_of_scores, mode, output, group_id):
             kind='reg',
         )
         pair_grid.fig.suptitle('{} metrics of {} on {}'.format(group_id, x.model, x.dataset))
+
     logger.info('plotting to {}'.format(output))
     pair_grid.savefig(str(output))
     plt.close()
@@ -131,5 +132,5 @@ def plot(data_index: DataIndex, prefix: Path, force=False):
                     real_data = get_and_scale_data(data_index, group_df)
                     do_plot(real_data, MODE_MODEL, target, group_name)
 
-   # plot_mode_metric()
+    plot_mode_metric()
     plot_mode_model()
