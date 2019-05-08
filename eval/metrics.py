@@ -1,8 +1,10 @@
 import logging
 import re
 import subprocess
+import sys
 from pathlib import Path
 
+import pickle
 from nltk.translate.bleu_score import sentence_bleu, corpus_bleu, SmoothingFunction
 
 import embedding_based as eb
@@ -349,8 +351,9 @@ class SerbanModelPPLScore(MetricWrapper):
             name=self.name,
         )
         logger.info('cmd: {}'.format(cmd))
-        text = subprocess.check_output(cmd, shell=True, universal_newlines=True)
+        text = subprocess.check_output(cmd, shell=True, universal_newlines=True, stderr=sys.stderr)
         utterance = list(map(float, self.UTTER_PPL_RE.findall(text)))
+        self._verify_len(test_dialogues, utterance)
         system = float(self.SYS_PPL_RE.search(text).group(1))
         return utterance, system
 
@@ -359,6 +362,13 @@ class SerbanModelPPLScore(MetricWrapper):
         yield cls(
             remove_stopwords=config.get('remove_stopwords')
         )
+
+    def _verify_len(self, test_dialogues, utterance):
+        len_test = len(pickle.load(open(test_dialogues, 'rb')))
+        if len(utterance) != len_test:
+            logger.error('len(utterance): {}'.format(len(utterance)))
+            logging.error('len(test_dialogues): {}'.format(len_test))
+            raise ValueError
 
     @property
     def fullname(self):
