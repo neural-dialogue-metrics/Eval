@@ -116,7 +116,7 @@ def remake_needed(target: Path, *sources, force=False):
     return False
 
 
-def plot_main(plot_fn=None):
+def plot_main():
     import argparse
     import seaborn as sns
     import matplotlib.pyplot as plt
@@ -125,14 +125,29 @@ def plot_main(plot_fn=None):
     parser.add_argument('-d', '--data-dir', help='where to look for score data')
     parser.add_argument('-p', '--prefix', help='where to store the plots')
     parser.add_argument('-f', '--force', action='store_true', help='remake everything regardless of timestamp')
+    parser.add_argument('-x', '--select', help='select some plots to run', nargs='+', metavar='plot')
 
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
     sns.set(color_codes=True)
-    if plot_fn is None:
-        plot_fn = globals()['plot']
+
+    def get_plots(name):
+        locals = {}
+        try:
+            exec('from corr.{} import plot'.format(name), locals, locals)
+        except ImportError as e:
+            raise ValueError('invalid plot {}'.format(name)) from e
+        return locals['plot']
+
+    plots_map = {
+        name: get_plots(name) for name in args.select
+    }
 
     data_index = DataIndex(args.data_dir)
-    plot_fn(data_index, Path(args.prefix), args.force)
+    for plot_key in args.select:
+        plot_fn = plots_map[plot_key]
+        logging.info('running plot_fn: {}'.format(plot_fn))
+        plot_fn(data_index, Path(args.prefix), args.force)
+
     logging.info('backend: {}'.format(plt.get_backend()))
     logging.info('all done')

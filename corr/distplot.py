@@ -1,8 +1,9 @@
 import logging
 from pathlib import Path
+
+import seaborn as sns
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
-import seaborn as sns
 from pandas import Series
 from sklearn.preprocessing import scale
 
@@ -44,9 +45,3 @@ def plot(data_index: DataIndex, prefix: Path, force=False):
         data = data_index.get_data(triple.filename).utterance
         logger.info('plotting to {}'.format(output))
         do_distplot(data, triple, output)
-
-
-if __name__ == '__main__':
-    from corr.utils import plot_main
-
-    plot_main()

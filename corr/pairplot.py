@@ -1,7 +1,9 @@
-from pathlib import Path
 import logging
+import traceback
+from pathlib import Path
 from typing import Union
 
+import functools
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
@@ -32,15 +34,27 @@ def get_output(prefix: Path, dataset, mode, mode_arg, group):
     return prefix / NAME / dataset / mode / mode_arg / group / PLOT_FILENAME
 
 
+def skip_exception(fn):
+    @functools.wraps(fn)
+    def do_skip(*args, **kwargs):
+        try:
+            return fn(*args, **kwargs)
+        except Exception:
+            traceback.print_exc()
+            logger.warning('exception occurred, skipped')
+
+    return do_skip
+
+
+@skip_exception
 def do_plot(list_of_scores, mode, output, group_id):
     x = list_of_scores[0]
     if mode == MODE_METRIC:
         df = pd.DataFrame({
-            item.model: item.utterance for item in list_of_scores,
+            item.model: item.utterance for item in list_of_scores
         })
         pair_grid = sns.pairplot(
             data=df,
-            hue='model',
             kind='reg',
         )
         pair_grid.fig.suptitle('{} of {} models on {}'.format(x.metric, group_id, x.dataset))
@@ -50,7 +64,6 @@ def do_plot(list_of_scores, mode, output, group_id):
         })
         pair_grid = sns.pairplot(
             data=df,
-            hue='metric',
             kind='reg',
         )
         pair_grid.fig.suptitle('{} metrics of {} on {}'.format(group_id, x.model, x.dataset))
@@ -108,9 +121,3 @@ def plot(data_index: DataIndex, prefix: Path, group_map=None, force=False):
 
     plot_mode_metric()
     plot_mode_model()
-
-
-if __name__ == '__main__':
-    from corr.utils import plot_main
-
-    plot_main()
