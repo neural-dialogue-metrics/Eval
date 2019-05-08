@@ -19,6 +19,28 @@ def scale_and_sample(frame: pd.DataFrame):
     return frame.sample(n=SAMPLE_SIZE, random_state=RANDOM_STATE).transform(sklearn_scale)
 
 
+class DataIndex:
+
+    def __init__(self, data_dir):
+        self.data_dir = Path(data_dir).absolute()
+        self._index = None
+        self._cache = {}
+
+    @property
+    def index(self):
+        if self._index is None:
+            self._index = load_filename_data(self.data_dir)
+        return self._index
+
+    def iter_triples(self):
+        return self.index.itertuples(index=False, name='Triple')
+
+    def get_data(self, path, scale=False):
+        if path in self._cache:
+            return self._cache[path]
+        return self._cache.setdefault(path, UtterScoreDist.from_json_file(path, scale))
+
+
 class Triple:
     def __init__(self, model, dataset, metric):
         self.model = model
@@ -37,15 +59,18 @@ class Triple:
 class UtterScoreDist(Triple):
     """Utterance-Score Distribution"""
 
-    def __init__(self, model, dataset, metric, system, utterance):
+    def __init__(self, model, dataset, metric, system, utterance, scale=False):
         super(UtterScoreDist, self).__init__(model, dataset, metric)
         self.system = system
+        self.scaled = scale
+        if scale:
+            utterance = sklearn_scale(utterance)
         self.utterance = utterance
 
     @classmethod
-    def from_json_file(cls, filename):
+    def from_json_file(cls, filename, scale=False):
         data = json.load(open(filename))
-        return cls(**data)
+        return cls(**data, scale=scale)
 
 
 def find_all_data_files(dir):
@@ -75,3 +100,39 @@ def substitute_url(url: str, check_full=False, **kwargs):
     if check_full and not is_fully_substituted(url):
         raise ValueError('url not fully substituted: {}'.format(url))
     return url
+
+
+def remake_needed(target: Path, *sources, force=False):
+    if force:
+        return True
+    if not target.exists():
+        return True
+    for src in sources:
+        if not src.exists():
+            raise ValueError('cannot remake with {}'.format(src))
+        if target.stat().st_mtime < src.stat().st_mtime:
+            return True
+    logger.info('{} is up to date'.format(target))
+    return False
+
+
+def plot_main(plot_fn=None):
+    import argparse
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--data-dir', help='where to look for score data')
+    parser.add_argument('-p', '--prefix', help='where to store the plots')
+    parser.add_argument('-f', '--force', action='store_true', help='remake everything regardless of timestamp')
+
+    args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO)
+    sns.set(color_codes=True)
+    if plot_fn is None:
+        plot_fn = globals()['plot']
+
+    data_index = DataIndex(args.data_dir)
+    plot_fn(data_index, Path(args.prefix), args.force)
+    logging.info('backend: {}'.format(plt.get_backend()))
+    logging.info('all done')

@@ -7,7 +7,7 @@ from pandas import Series
 from sklearn.preprocessing import scale
 
 from corr.consts import PLOT_FILENAME
-from corr.data import DataIndex
+from corr.utils import DataIndex
 
 NAME = 'distplot'
 
@@ -44,3 +44,9 @@ def plot(data_index: DataIndex, prefix: Path, force=False):
         data = data_index.get_data(triple.filename).utterance
         logger.info('plotting to {}'.format(output))
         do_distplot(data, triple, output)
+
+
+if __name__ == '__main__':
+    from corr.utils import plot_main
+
+    plot_main()

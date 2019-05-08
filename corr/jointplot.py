@@ -9,11 +9,8 @@ import seaborn as sns
 from scipy.stats import pearsonr
 from sklearn.preprocessing import scale
 
-from corr.data import DataIndex
-
-warnings.filterwarnings('ignore', r'JointGrid annotation is deprecated')
+from corr.utils import DataIndex
 from corr.utils import UtterScoreDist
-
 from corr.consts import *
 
 NAME = 'jointplot'
@@ -81,5 +78,12 @@ def plot(data_index: DataIndex, prefix: Path, force=False):
                     logging.info('x: {}'.format(x))
                     logging.info('y: {}'.format(y))
 
+    warnings.filterwarnings('ignore', r'JointGrid annotation is deprecated')
     plot_for_mode(MODE_MODEL)
     plot_for_mode(MODE_METRIC)
+
+
+if __name__ == '__main__':
+    from corr.utils import plot_main
+
+    plot_main()
