@@ -147,7 +147,7 @@ def plot_main():
     for plot_key in args.select:
         plot_fn = plots_map[plot_key]
         logging.info('running plot_fn: {}'.format(plot_fn))
-        plot_fn(data_index, Path(args.prefix), args.force)
+        plot_fn(data_index, Path(args.prefix), force=args.force)
 
     logging.info('backend: {}'.format(plt.get_backend()))
     logging.info('all done')

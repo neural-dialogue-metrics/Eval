@@ -3,6 +3,7 @@ import traceback
 from pathlib import Path
 from typing import Union
 
+import warnings
 import functools
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -15,14 +16,14 @@ from corr.utils import remake_needed
 NAME = 'pairplot'
 
 GROUP_MAP = {
-    'word_overlap': [
-        'bleu_4',
-        'rouge_2',
-        'meteor',
-    ],
-    'rouge': 'all',
-    'bleu': 'all',
-    'distinct_n': 'all',
+    # 'word_overlap': [
+    #     'bleu_4',
+    #     'rouge_2',
+    #     'meteor',
+    # ],
+    # 'rouge': 'all',
+    # 'bleu': 'all',
+    # 'distinct': 'all',
     'embedding_based': 'all',
 }
 
@@ -46,13 +47,21 @@ def skip_exception(fn):
     return do_skip
 
 
+# shorten name for embedding_based.
+def shorten_name(name):
+    if name.startswith('embedding_based'):
+        parts = name.split('_')[2:]
+        return '_'.join(parts)
+    return name
+
+
 @skip_exception
 def do_plot(list_of_scores, mode, output, group_id):
     x = list_of_scores[0]
     if mode == MODE_METRIC:
         df = pd.DataFrame({
             item.model: item.utterance for item in list_of_scores
-        })
+        }).sort_index()
         pair_grid = sns.pairplot(
             data=df,
             kind='reg',
@@ -60,7 +69,7 @@ def do_plot(list_of_scores, mode, output, group_id):
         pair_grid.fig.suptitle('{} of {} models on {}'.format(x.metric, group_id, x.dataset))
     else:
         df = pd.DataFrame({
-            item.metric: item.utterance for item in list_of_scores
+            shorten_name(item.metric): item.utterance for item in list_of_scores
         })
         pair_grid = sns.pairplot(
             data=df,
@@ -89,10 +98,16 @@ def get_metric_group(df: pd.DataFrame, group_name, rules: Union[list, str]):
     else:
         pattern = '|'.join(map(lambda r: '(' + r + ')', rules))
     logger.info('pattern {}'.format(pattern))
-    return df[df['metric'].str.contains(pattern, regex=True)]
+    group_df = df[df['metric'].str.contains(pattern, regex=True)]
+    if not len(group_df):
+        raise ValueError('pattern does not match any row!')
+    return group_df
 
 
-def plot(data_index: DataIndex, prefix: Path, group_map=None, force=False):
+def plot(data_index: DataIndex, prefix: Path, force=False):
+    warnings.filterwarnings('ignore', message='This pattern has match groups')
+    group_map = GROUP_MAP
+
     def plot_mode_metric():
         logger.info('plotting for mode {}'.format(MODE_METRIC))
         group_name = 'all'
@@ -116,8 +131,5 @@ def plot(data_index: DataIndex, prefix: Path, group_map=None, force=False):
                     real_data = get_and_scale_data(data_index, group_df)
                     do_plot(real_data, MODE_MODEL, target, group_name)
 
-    if group_map is None:
-        group_map = GROUP_MAP
-
-    plot_mode_metric()
+   # plot_mode_metric()
     plot_mode_model()
