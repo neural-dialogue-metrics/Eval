@@ -108,6 +108,18 @@ def find_serban_models(model_root=SERBAN_MODEL_ROOT, result_root=SERBAN_RESULT_R
     return list(SerbanModelFinder(model_root, result_root).find_models())
 
 
+def find_random_models(result_root=RANDOM_RESULT_ROOT):
+    result_root = Path(result_root)
+    model_name = result_root.name.lower()  # random
+
+    def iter_models():
+        for ds in subdirs(result_root):
+            responses = ds.joinpath('output.txt')
+            yield Model(name=model_name, trained_on=ds.name.lower(), responses=responses)
+
+    return list(iter_models())
+
+
 all_models = find_serban_models()
 
 all_datasets = {
