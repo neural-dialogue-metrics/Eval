@@ -73,6 +73,9 @@ class BleuScore(MetricWrapper):
         self._smoothing_fn = self.cherry.method1 if smoothing else self.cherry.method0
 
     def __call__(self, responses, references):
+        logger.info('responses: {}'.format(len(responses)))
+        logger.info('references: {}'.format(len(references)))
+
         list_of_references = [[ref] for ref in references]
         utterance = [sentence_bleu(ref, hypo, self._weights, smoothing_function=self._smoothing_fn)
                      for ref, hypo in zip(list_of_references, responses)]

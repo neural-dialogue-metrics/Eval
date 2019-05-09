@@ -120,7 +120,7 @@ def find_random_models(result_root=RANDOM_RESULT_ROOT):
     return list(iter_models())
 
 
-all_models = find_serban_models()
+all_models = find_serban_models() + find_random_models()
 
 all_datasets = {
     'ubuntu': {

@@ -94,7 +94,7 @@ class ResourceLoader:
     def load_resource_for_key(self, key, under_test, requires):
         source, load_fn = requires[key]
         filename = under_test.get_resource_file(source)
-
+        logger.info('{} resolved to {}'.format(source, filename))
         resource_key = (filename, format)
         if resource_key in self.resources_cache:
             return self.resources_cache[resource_key]

@@ -24,11 +24,12 @@ if __name__ == '__main__':
         datasets = load_config(args.config)['datasets']
 
     datasets = parse_dataset(datasets)
+    # note the last line does not end with \n.
     for ds in datasets:
         logging.info('dataset: {}'.format(ds.references))
-        references = Path(ds.references).open().readlines()
+        references = Path(ds.references).read_text().splitlines()
         np.random.shuffle(references)
         output = prefix.joinpath(ds.name).joinpath(OUTPUT_FILENAME)
         if not output.parent.exists():
             output.parent.mkdir(parents=True)
-        output.open('w').writelines(references)
+        output.write_text('\n'.join(references))
