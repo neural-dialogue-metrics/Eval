@@ -16,14 +16,15 @@ def load_filename(filename):
     return filename
 
 
-loader_fns = {
+default_load_fns = {
+    # format name, load_fn.
     'token_list': eb.load_corpus_from_file,
     'embeddings': eb.load_word2vec_binary,
     'filename': load_filename,
     'path': lambda s: Path(s),
 }
 
-default_load_info = {
+default_requires = {
     # key, source, format.
     RESPONSES: ('model.responses', 'token_list'),
     CONTEXTS: ('dataset.contexts', 'token_list'),
@@ -35,7 +36,7 @@ default_load_info = {
 def normalize_format(format):
     if callable(format):
         return format
-    return loader_fns[format]
+    return default_load_fns[format]
 
 
 class ResourceLoader:
@@ -62,17 +63,17 @@ class ResourceLoader:
             if isinstance(dict_or_list, dict):
                 for key, value in dict_or_list.items():
                     if isinstance(value, str) or callable(value):
-                        source, format = default_load_info[key][0], value
+                        source, load_fn = default_requires[key][0], value
                     elif isinstance(value, (tuple, list)):
-                        source, format = value
+                        source, load_fn = value
                     else:
                         raise TypeError('invalid type for requires entry')
-                    format = normalize_format(format)
-                    requires[key] = source, format
+                    load_fn = normalize_format(load_fn)
+                    requires[key] = source, load_fn
             elif isinstance(dict_or_list, (list, tuple)):
                 for key in dict_or_list:
-                    source, format = default_load_info[key]
-                    requires[key] = source, normalize_format(format)
+                    source, load_fn = default_requires[key]
+                    requires[key] = source, normalize_format(load_fn)
             else:
                 raise TypeError('invalid type for requires')
             return requires
@@ -95,7 +96,7 @@ class ResourceLoader:
         source, load_fn = requires[key]
         filename = under_test.get_resource_file(source)
         logger.info('{} resolved to {}'.format(source, filename))
-        resource_key = (filename, format)
+        resource_key = (filename, load_fn)
         if resource_key in self.resources_cache:
             return self.resources_cache[resource_key]
 
@@ -111,7 +112,7 @@ class ResourceLoader:
         requires = self.get_normalized_requires(under_test.metric.requires)
         return {
             key: Path(under_test.get_resource_file(source))
-            for key, (source, format) in requires.items()
+            for key, (source, _) in requires.items()
         }
 
     def get_filename_for_key(self, key, under_test):
