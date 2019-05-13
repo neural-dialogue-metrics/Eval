@@ -12,7 +12,7 @@ def get_model(name, trained_on):
     for model in all_models:
         if name == model.name and trained_on == model.trained_on:
             return model
-    raise ValueError('unknown model: {} on {}'.format(name, trained_on))
+    raise ValueError('unknown model: {} trained on {}'.format(name, trained_on))
 
 
 def get_dataset(name):
