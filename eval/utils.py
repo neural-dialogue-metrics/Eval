@@ -89,11 +89,14 @@ class SerbanModel(Model):
 
 
 class Dataset:
-    def __init__(self, name, contexts, references, **kwargs):
+    def __init__(self, name, contexts, references,
+                 test_dialogues=None, vocabulary=None, train_set=None):
         self.name = name
         self.contexts = contexts
         self.references = references
-        self.__dict__.update(kwargs)
+        self.test_dialogues = test_dialogues
+        self.vocabulary = vocabulary
+        self.train_set = train_set
 
     def __repr__(self):
         return '<{} {}>'.format(self.__class__.__qualname__, self.name)

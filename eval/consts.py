@@ -1,6 +1,8 @@
 CONTEXTS = 'contexts'
 RESPONSES = 'responses'
 REFERENCES = 'references'
+VOCABULARY = 'vocabulary'
+TRAIN_SET = 'train_set'
 
 # EmbeddingBaseScore
 EMBEDDINGS = 'embeddings'

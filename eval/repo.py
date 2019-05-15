@@ -50,7 +50,7 @@ def find_pretrained_serban_model(prefix=SERBAN_UBUNTU_MODEL_DIR, trained_on='ubu
     return list(iter_models())
 
 
-def model_path(response_path, **kwargs):
+def model_path(response_path):
     parts = Path(response_path).parts
     assert parts[-1].endswith('.txt'), 'path not pointing to valid output.txt'
     dataset, model = parts[-3:-1]
@@ -58,7 +58,6 @@ def model_path(response_path, **kwargs):
         name=model.lower(),
         trained_on=dataset.lower(),
         responses=response_path,
-        **kwargs,
     )
 
 
@@ -125,16 +124,22 @@ all_datasets = {
         CONTEXTS: '/home/cgsdfc/UbuntuDialogueCorpus/ResponseContextPairs/raw_testing_contexts.txt',
         REFERENCES: '/home/cgsdfc/UbuntuDialogueCorpus/ResponseContextPairs/raw_testing_responses.txt',
         TEST_DIALOGUES: '/home/cgsdfc/UbuntuDialogueCorpus/Test.dialogues.pkl',
+        VOCABULARY: '/home/cgsdfc/UbuntuDialogueCorpus/Dataset.dict.pkl',
+        TRAIN_SET: '/home/cgsdfc/UbuntuDialogueCorpus/Training.dialogues.pkl',
     },
     'opensub': {
         CONTEXTS: '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/eval/test.context.txt',
         REFERENCES: '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/eval/test.response.txt',
         TEST_DIALOGUES: '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/eval/test.dialogues.pkl',
+        VOCABULARY: '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/train.dict.pkl',
+        TRAIN_SET: '/home/cgsdfc/SerbanOpenSubData/dialogue_length3_6/train.dialogues.pkl',
     },
     'lsdscc': {
         CONTEXTS: '/home/cgsdfc/SerbanLSDSCC/raw_test_dialogues.context',
         REFERENCES: '/home/cgsdfc/SerbanLSDSCC/raw_test_dialogues.response',
         TEST_DIALOGUES: '/home/cgsdfc/SerbanLSDSCC/vocab_35000/Test.dialogues.pkl',
+        VOCABULARY: '/home/cgsdfc/SerbanLSDSCC/vocab_35000/Train.dict.pkl',
+        TRAIN_SET: '/home/cgsdfc/SerbanLSDSCC/vocab_35000/Train.dialogues.pkl',
     }
 }
 
