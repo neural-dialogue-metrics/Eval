@@ -27,16 +27,30 @@ class DatasetStats:
 
     def __init__(self, dataset: Dataset):
         self.dataset = dataset
-        self.train_set_data = unpickle(dataset.train_set)
-        self.train_stats = self.CorpusStats(self.train_set_data)
-        self.vocab_data = unpickle(dataset.vocabulary)
+        self.train_set_data = None
+        self.test_set_data = None
+        self.vocab_data = None
 
     @property
     def vocab_size(self):
+        if self.vocab_data is None:
+            self.vocab_data = unpickle(self.dataset.vocabulary)
         return len(self.vocab_data)
 
+    @property
+    def train_stats(self):
+        if self.train_set_data is None:
+            self.train_set_data = unpickle(self.dataset.train_set)
+        return self.CorpusStats(self.train_set_data)
 
-if __name__ == '__main__':
+    @property
+    def test_stats(self):
+        if self.test_set_data is None:
+            self.test_set_data = unpickle(self.dataset.test_dialogues)
+        return self.CorpusStats(self.test_set_data)
+
+
+def train_stats():
     for ds in parse_dataset(all_datasets):
         ds_stats = DatasetStats(ds)
         print(ds.name)
@@ -44,3 +58,16 @@ if __name__ == '__main__':
         print('train.n_examples {}'.format(ds_stats.train_stats.n_examples))
         print('train.n_tokens {}'.format(ds_stats.train_stats.n_tokens))
         print()
+
+
+def test_stat():
+    for ds in parse_dataset(all_datasets):
+        ds_stats = DatasetStats(ds)
+        print(ds.name)
+        print('test.n_examples {}'.format(ds_stats.test_stats.n_examples))
+        print('test.n_tokens {}'.format(ds_stats.test_stats.n_tokens))
+        print()
+
+
+if __name__ == '__main__':
+    test_stat()
