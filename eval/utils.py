@@ -27,11 +27,10 @@ def ruber_data(train_dir, data_dir, embedding):
 
 
 class Model:
-    def __init__(self, name, trained_on, responses, **kwargs):
+    def __init__(self, name, trained_on, responses):
         self.name = name
         self.trained_on = trained_on
         self.responses = responses
-        self.__dict__.update(kwargs)
 
     def __repr__(self):
         return f'Model({self.name}, {self.trained_on})'

@@ -22,6 +22,7 @@ default_load_fns = {
     'embeddings': eb.load_word2vec_binary,
     'filename': load_filename,
     'path': lambda s: Path(s),
+    'lines': lambda s: Path(s).read_text().splitlines(),
 }
 
 default_requires = {

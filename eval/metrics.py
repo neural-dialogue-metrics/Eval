@@ -356,7 +356,6 @@ class SerbanModelPPLScore(MetricWrapper):
         logger.info('cmd: {}'.format(cmd))
         text = subprocess.check_output(cmd, shell=True, universal_newlines=True, stderr=sys.stderr)
         utterance = list(map(float, self.UTTER_PPL_RE.findall(text)))
-        self._verify_len(test_dialogues, utterance)
         system = float(self.SYS_PPL_RE.search(text).group(1))
         return utterance, system
 
