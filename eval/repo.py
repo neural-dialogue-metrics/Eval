@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 
 from eval.consts import *
-from eval.utils import Dataset, Model, subdirs
+from eval.utils import Dataset, Model, subdirs, SerbanModel
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +94,7 @@ class SerbanModelFinder:
                     dataset_dir.name).joinpath(model_dir.name).joinpath(OUTPUT_FILENAME)
                 if not output_file.exists():
                     logger.warning('output_file {} does not exist'.format(output_file))
-                yield Model(
+                yield SerbanModel(
                     name=model_dir.name.lower(),
                     trained_on=dataset_dir.name.lower(),
                     responses=output_file,

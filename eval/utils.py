@@ -30,6 +30,29 @@ class Model:
         return f'Model({self.name}, {self.trained_on})'
 
 
+class SerbanModel(Model):
+
+    @classmethod
+    def get_prototype(cls, model, dataset):
+        dataset = cls.dataset_out_rules.get(dataset, dataset.lower())
+        return f'prototype_{dataset}_{model.upper()}'
+
+    dataset_out_rules = {
+        'opensub': 'opensubtitles',
+    }
+
+    def __init__(self, weights=None, prototype=None, **kwargs):
+        super().__init__(**kwargs)
+        self.weights = weights
+        self._prototype = prototype
+
+    @property
+    def prototype(self):
+        if self._prototype is None:
+            return self.get_prototype(self.name, self.trained_on)
+        return self._prototype
+
+
 class Dataset:
     def __init__(self, name, contexts, references, **kwargs):
         self.name = name
