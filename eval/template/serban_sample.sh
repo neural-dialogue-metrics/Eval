@@ -4,7 +4,7 @@ MODEL_PREFIX={model_prefix}
 CONTEXT={context}
 OUTPUT={output}
 
-GPU=0
+GPU={gpu}
 SERBAN_IMAGE=ufoym/deepo:theano-py36-cu90
 SERBAN_ROOT=/home/cgsdfc/deployment/Models/HRED-VHRED
 

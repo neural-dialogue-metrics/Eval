@@ -1,21 +1,22 @@
 """
 A random model -- shuffle the ground truth as output
 """
+import argparse
+import logging
 from pathlib import Path
 
 import numpy as np
-import argparse
-import logging
 
 from eval.config_parser import load_config, parse_dataset
-from eval.consts import RANDOM_RESULT_ROOT, OUTPUT_FILENAME
+from eval.consts import RANDOM_MODEL_ROOT
+from eval.repo import get_model
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config')
     parser.add_argument('-p', '--prefix')
     args = parser.parse_args()
-    prefix = args.prefix or Path(RANDOM_RESULT_ROOT)
+    prefix = Path(args.prefix or RANDOM_MODEL_ROOT)
     logging.basicConfig(level=logging.INFO)
 
     if args.config is None:
@@ -29,7 +30,8 @@ if __name__ == '__main__':
         logging.info('dataset: {}'.format(ds.references))
         references = Path(ds.references).read_text().splitlines()
         np.random.shuffle(references)
-        output = prefix.joinpath(ds.name).joinpath(OUTPUT_FILENAME)
+
+        output = get_model('random', ds.name).responses
         if not output.parent.exists():
             output.parent.mkdir(parents=True)
         output.write_text('\n'.join(references))

@@ -1,5 +1,6 @@
+import numpy as np
 from pathlib import Path
-from eval.consts import SEPARATOR
+from eval.consts import SEPARATOR, GPU_LOW, GPU_HIGH
 
 
 def ruber_data(train_dir, data_dir, embedding):
@@ -88,3 +89,7 @@ def subdirs(path: Path):
     for file in path.iterdir():
         if file.is_dir():
             yield file
+
+
+def get_random_gpu(low=GPU_LOW, high=GPU_HIGH):
+    return np.random.randint(low=low, high=high)

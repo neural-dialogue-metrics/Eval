@@ -64,11 +64,9 @@ def model_path(response_path, **kwargs):
 
 class SerbanModelFinder:
     SUFFIXES = ('_model.npz', '_timing.npz', '_state.pkl')
-    OUTPUT = 'output.txt'
 
-    def __init__(self, model_root, result_root):
+    def __init__(self, model_root):
         self.model_root = Path(model_root)
-        self.result_root = Path(result_root)
 
     def find_latest_model(self, model_dir):
         model_suffix = self.SUFFIXES[0]
@@ -92,8 +90,8 @@ class SerbanModelFinder:
         for dataset_dir in subdirs(self.model_root):
             for model_dir in subdirs(dataset_dir):
                 weights = self.find_latest_model(model_dir)
-                output_file = self.result_root.joinpath(
-                    dataset_dir.name).joinpath(model_dir.name).joinpath(self.OUTPUT)
+                output_file = self.model_root.joinpath(
+                    dataset_dir.name).joinpath(model_dir.name).joinpath(OUTPUT_FILENAME)
                 if not output_file.exists():
                     logger.warning('output_file {} does not exist'.format(output_file))
                 yield Model(
@@ -104,17 +102,17 @@ class SerbanModelFinder:
                 )
 
 
-def find_serban_models(model_root=SERBAN_MODEL_ROOT, result_root=SERBAN_RESULT_ROOT):
-    return list(SerbanModelFinder(model_root, result_root).find_models())
+def find_serban_models(model_root=SERBAN_MODEL_ROOT):
+    return list(SerbanModelFinder(model_root).find_models())
 
 
-def find_random_models(result_root=RANDOM_RESULT_ROOT):
-    result_root = Path(result_root)
-    model_name = result_root.name.lower()  # random
+def find_random_models(model_root=RANDOM_MODEL_ROOT):
+    model_root = Path(model_root)
+    model_name = model_root.name.lower()
 
     def iter_models():
-        for ds in subdirs(result_root):
-            responses = ds.joinpath('output.txt')
+        for ds in subdirs(model_root):
+            responses = ds.joinpath(OUTPUT_FILENAME)
             yield Model(name=model_name, trained_on=ds.name.lower(), responses=responses)
 
     return list(iter_models())

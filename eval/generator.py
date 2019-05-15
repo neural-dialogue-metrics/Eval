@@ -1,8 +1,9 @@
-from pathlib import Path
 import logging
-from eval.utils import load_template
-from eval.repo import find_serban_models, all_datasets
+from pathlib import Path
+
 from eval.config_parser import product_models_datasets, parse_dataset
+from eval.repo import find_serban_models, all_datasets
+from eval.utils import load_template, get_random_gpu
 
 dataset_out_rules = {
     'opensub': 'opensubtitles',
@@ -28,6 +29,7 @@ def get_train(model, dataset, name):
         save_dir=save_dir,
         prototype=prototype,
         model_prefix=model_prefix,
+        gpu=get_random_gpu(),
     )
 
 
@@ -40,10 +42,13 @@ def get_sample(model, dataset, name):
         model_prefix=model_prefix,
         context=context,
         output=output,
+        gpu=get_random_gpu(),
     )
 
 
 def train_and_sample_scripts(output_dir: Path):
+    if not output_dir.exists():
+        output_dir.mkdir(parents=True)
     scripts_map = {
         'train': get_train,
         'sample': get_sample,

@@ -43,15 +43,16 @@ METEOR_JAR_FILE = '/home/cgsdfc/deployment/Metrics/METEOR/meteor-1.5/meteor-1.5.
 # lsdscc
 MULTI_RESPONSES = 'multi_responses'
 
-# serban ppl
-SERBAN_MODEL_ROOT = '/home/cgsdfc/SavedModels/HRED-VHRED'
-SERBAN_RESULT_ROOT = '/home/cgsdfc/Result/HRED-VHRED'
+MODEL_ROOT = '/home/cgsdfc/SavedModels-v2'
+SERBAN_MODEL_ROOT = '/home/cgsdfc/SavedModels-v2/HRED-VHRED'
 
 TEST_DIALOGUES = 'test_dialogues'
-
 MODEL_WEIGHTS = 'model_weights'
 
-# random
-RANDOM_RESULT_ROOT = '/home/cgsdfc/Result/Random'
+# random model
+RANDOM_MODEL_ROOT = '/home/cgsdfc/SavedModels-v2/Random'
 
 OUTPUT_FILENAME = 'output.txt'
+
+GPU_LOW = 0
+GPU_HIGH = 1

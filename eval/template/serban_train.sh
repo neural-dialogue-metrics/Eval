@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-GPU=0
+GPU={gpu}
 SAVE_DIR={save_dir}
 SERBAN_ROOT=/home/cgsdfc/deployment/Models/HRED-VHRED
 SERBAN_IMAGE=ufoym/deepo:theano-py36-cu90
