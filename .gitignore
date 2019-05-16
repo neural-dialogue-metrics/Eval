@@ -58,6 +58,7 @@ docs/_build/
 target/
 configs/
 save/
+save-v2/
 plots/
 notebook/
 paper/
