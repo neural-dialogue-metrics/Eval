@@ -12,7 +12,7 @@ from eval.consts import RANDOM_MODEL_ROOT
 from eval.repo import get_model
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser('Run the random model (response by randomly shuffling the references')
     parser.add_argument('-c', '--config')
     parser.add_argument('-p', '--prefix')
     args = parser.parse_args()

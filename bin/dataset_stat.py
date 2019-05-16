@@ -1,6 +1,4 @@
 import pickle
-import subprocess
-from pathlib import Path
 
 from eval.config_parser import parse_dataset
 from eval.repo import all_datasets
@@ -8,7 +6,7 @@ from eval.utils import Dataset
 
 
 def unpickle(path):
-    return pickle.loads(Path(path).read_bytes())
+    return pickle.load(open(path, 'rb'))
 
 
 class DatasetStats:

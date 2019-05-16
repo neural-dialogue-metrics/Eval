@@ -12,7 +12,7 @@ TEXTUAL_FORMATS = {
 }
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser('View various info about models and datasets')
     parser.add_argument('-m', '--model', help='specify a model name')
     parser.add_argument('-d', '--dataset', help='specify a dataset name (needed with -m)')
     parser.add_argument('-w', '--what', help='the object to inspect')

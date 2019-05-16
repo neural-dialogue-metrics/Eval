@@ -73,7 +73,7 @@ class ExampleMaker:
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser('Make examples by randomly sampling')
     parser.add_argument('-p', '--prefix', help='output prefix of the example files')
     parser.add_argument('-n', '--n-examples', type=int, default=15, help='number of examples to draw')
     parser.add_argument('-f', '--format', help='output format of an individual example',
