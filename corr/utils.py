@@ -130,6 +130,7 @@ def plot_main():
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
     sns.set(color_codes=True)
+    sns.set(font='Times New Roman')
 
     def get_plots(name):
         locals = {}
@@ -146,7 +147,7 @@ def plot_main():
     data_index = DataIndex(args.data_dir)
     for plot_key in args.select:
         plot_fn = plots_map[plot_key]
-        logging.info('running plot_fn: {}'.format(plot_fn))
+        logging.info('running plot_fn: {}'.format(plot_fn.__name__))
         plot_fn(data_index, Path(args.prefix), force=args.force)
 
     logging.info('backend: {}'.format(plt.get_backend()))
