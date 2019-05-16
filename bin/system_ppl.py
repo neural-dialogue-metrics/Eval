@@ -21,5 +21,5 @@ if __name__ == '__main__':
         print(f"""
         Model: {score_dist.model}
         Dataset: {score_dist.dataset}
-        PPL: {score_dist.system}
+        PPL: {score_dist.system:.4f}
         """)

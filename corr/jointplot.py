@@ -51,7 +51,7 @@ def do_plot(x: UtterScoreDist, y: UtterScoreDist, mode: str, output):
         joint_grid.set_axis_labels(xlabel=x.model, ylabel=y.model)
     joint_grid.savefig(str(output))
     logger.info('plotting to {}'.format(output))
-    plt.close()
+    plt.close('all')
 
 
 def plot(data_index: DataIndex, prefix: Path, force=False):

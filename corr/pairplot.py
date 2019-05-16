@@ -79,7 +79,7 @@ def do_plot(list_of_scores, mode, output, group_id):
 
     logger.info('plotting to {}'.format(output))
     pair_grid.savefig(str(output))
-    plt.close()
+    plt.close('all')
 
 
 def get_and_scale_data(data_index, df):

@@ -8,7 +8,7 @@ MODEL_PREFIX={model_prefix}
 TEST_PATH={test_path}
 SAVE_DIR={save_dir}
 
-BS=80
+BS=60
 
 docker run --rm -it --runtime nvidia \
     --name {name} \
@@ -20,5 +20,4 @@ docker run --rm -it --runtime nvidia \
     python bin/evaluate.py $MODEL_PREFIX \
         --test-path $TEST_PATH \
         --save-dir $SAVE_DIR \
-        {remove_stopwords} \
-        --bs $BS
+        {remove_stopwords} --bs $BS
