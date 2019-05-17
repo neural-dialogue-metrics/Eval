@@ -6,13 +6,14 @@ import logging
 from corr.utils import find_all_data_files, UtterScoreDist
 from numpy import NaN
 from pandas import DataFrame
-from pylatex import Tabular, Table, Document, Command, Label, Marker, MultiColumn, TableRowSizeError
+from pylatex import Tabular, Table, Document, Command, Label, Marker, MultiColumn, TableRowSizeError, NoEscape
 from corr.normalize import normalize_name
 
 logger = logging.getLogger(__name__)
 
 
 class SystemScoreTable(Table):
+    _latex_name = 'table'
     places = 4
     order = ['metric', 'dataset', 'model']
 
@@ -23,25 +24,28 @@ class SystemScoreTable(Table):
 
         self.append(Command('centering'))
         self.add_caption(caption)
-        self.append(Label(Marker(name=label, prefix='tab')))
+        self.append(Label(Marker(name=NoEscape(label), prefix='tab')))
 
         self.models = sorted(system_scores.model.unique())
         self.datasets = sorted(system_scores.dataset.unique())
         self.metrics = sorted(system_scores.metric.unique())
 
         self.num_columns = len(self.datasets) * len(self.models) + 1
-        self.tabular = Tabular(table_spec='c' * self.num_columns)
+        self.tabular = Tabular(table_spec='|' + 'l|' * self.num_columns)
 
         self.tabular.add_hline()
         self.tabular.add_row(self._dataset_header())
+        self.tabular.add_hline()
         self.tabular.add_row(self._model_header())
+        self.tabular.add_hline()
         self._add_scores(system_scores)
         self.append(self.tabular)
 
     def _dataset_header(self):
         header = ['']
         for ds in self.datasets:
-            header.append(MultiColumn(len(self.models), data=normalize_name('dataset', ds)))
+            data = normalize_name('dataset', ds)
+            header.append(MultiColumn(len(self.models), data=data, align='c|'))
         return header
 
     def _model_header(self):
@@ -120,7 +124,8 @@ def make_table():
         label='system_scores_all',
         system_scores=df,
     )
-    print(table.dumps())
+    output = Path('/home/cgsdfc/GraduateDesign/data/system_scores.tex')
+    output.write_text(table.dumps())
 
 
 if __name__ == '__main__':
