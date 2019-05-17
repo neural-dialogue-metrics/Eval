@@ -1,11 +1,10 @@
-import re
 import argparse
 import logging
 import re
 import shutil
+from operator import attrgetter
 from pathlib import Path
 
-import pandas as pd
 from eval.consts import *
 from eval.utils import subdirs
 from pandas import DataFrame
@@ -40,7 +39,13 @@ def localize_files(prefix: Path):
     localize_datasets()
 
 
-def print_examples(prefix: Path, n=6, eot_token='->', seed=None):
+def print_examples(prefix: Path, n=None, eot_token=None, seed=None, mode=None):
+    if n is None: n = 6
+    if seed is None: seed = 666
+    if eot_token is None: eot_token = '->'
+    if mode is None:
+        mode = 'latex'
+
     def cleanup(utter):
         utter = (utter
                  .replace('</s>', ' ')
@@ -65,26 +70,46 @@ def print_examples(prefix: Path, n=6, eot_token='->', seed=None):
             yield ds.name, session
 
     ignored = ('index', 'random')
-    for name, sess in iter_sessions():
-        data: DataFrame = DataFrame(sess).sample(n=n, random_state=seed).reset_index()
-        print('Dataset: {}'.format(name))
-        print('===================')
-        for index, row in data.iterrows():
-            print('Example #{}'.format(index))
-            for index, value in row.iteritems():
-                if index in ignored:
-                    continue
-                print('{}: {}'.format(index.capitalize(), cleanup(value)))
+
+    def print_plain():
+        for name, sess in iter_sessions():
+            data: DataFrame = DataFrame(sess).sample(n=n, random_state=seed).reset_index()
+            print('Dataset: {}'.format(name))
+            print('===================')
+            for index, row in data.iterrows():
+                print('Example #{}'.format(index))
+                for index, value in row.iteritems():
+                    if index in ignored:
+                        continue
+                    print('{}: {}'.format(index.capitalize(), value))
+                print()
             print()
-        print()
+
+    def print_latex_table():
+        order = (CONTEXTS, REFERENCES, 'lstm', 'vhred', 'hred')
+        for name, sess in iter_sessions():
+            data: DataFrame = DataFrame(sess).sample(n=n, random_state=seed).reset_index()
+            print('Dataset: {}'.format(name))
+            for index, row in data.iterrows():
+                line = ' & '.join([getattr(row, attr) for attr in order])
+                print(line, end=' \\\\\n')
+                print('\\hline')
+            print()
+
+    if mode == 'latex':
+        print_latex_table()
+    elif mode == 'plain':
+        print_plain()
+    else:
+        raise ValueError
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('Make examples by randomly sampling')
     parser.add_argument('-p', '--prefix', help='output prefix')
-    parser.add_argument('-n', '--n-examples', type=int, default=15, help='number of examples to draw')
+    parser.add_argument('-n', '--n-examples', type=int, default=None, help='number of examples to draw')
     parser.add_argument('-l', '--localize', action='store_true', help='localize the files')
-    parser.add_argument('-s', '--seed', type=int, default=666, help='random seed')
+    parser.add_argument('-s', '--seed', type=int, default=None, help='random seed')
     parser.add_argument('-x', '--print-examples', action='store_true')
     args = parser.parse_args()
 

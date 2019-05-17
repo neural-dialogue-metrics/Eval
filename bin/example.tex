@@ -1,0 +1,14 @@
+\begin{table}
+    \centering
+    \begin{tabular}{llm{0.6\textwidth}}
+        \toprule
+        消息 & 响应 \\
+        \midrule
+        {% for example in examples %}
+        \multirow{4}{*}{ example.contexts </s> }
+        & \textbf{参考:} & example.references \\
+        {% for model in example.models %}
+        & \textbf{  :} & model.responses \\
+        \bottomrule
+    \end{tabular}
+\end{table}
