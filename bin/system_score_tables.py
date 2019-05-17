@@ -58,10 +58,16 @@ class SystemScoreTable(Table):
             header.extend(model_names)
         return header
 
-    def _get_model_scores(self, df: DataFrame):
+    def _get_model_scores(self, df: DataFrame, metric):
         scores = list(map(str, df['system'].values))
-        max_pos = df['system'].values.argmax()
-        scores[max_pos] = bold(scores[max_pos])
+        if metric == 'serban_ppl':
+            fn = 'argmin'
+        elif metric == 'utterance_len':
+            return scores
+        else:
+            fn = 'argmax'
+        pos = getattr(df['system'].values, fn)()
+        scores[pos] = bold(scores[pos])
         return scores
 
     def _add_scores(self, system_scores: DataFrame):
@@ -71,7 +77,7 @@ class SystemScoreTable(Table):
         for metric, df in system_scores.groupby('metric'):
             row = [normalize_name('metric', metric)]
             for dataset, df2 in df.groupby('dataset'):
-                row.extend(self._get_model_scores(df2))
+                row.extend(self._get_model_scores(df2, metric))
             try:
                 self.tabular.add_row(row)
             except TableRowSizeError:
