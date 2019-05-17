@@ -34,7 +34,7 @@ class SystemScoreTable(Table):
         self.metrics = sorted(system_scores.metric.unique())
 
         self.num_columns = len(self.datasets) * len(self.models) + 1
-        self.tabular = Tabular(table_spec='|' + 'l|' * self.num_columns)
+        self.tabular = Tabular(table_spec='l' * self.num_columns, booktabs=True, col_space='0.11cm')
 
         self.tabular.add_hline()
         self.tabular.add_row(self._dataset_header())
@@ -48,7 +48,7 @@ class SystemScoreTable(Table):
         header = ['']
         for ds in self.datasets:
             data = normalize_name('dataset', ds)
-            header.append(MultiColumn(len(self.models), data=data, align='c|'))
+            header.append(MultiColumn(len(self.models), data=data, align='c'))
         return header
 
     def _model_header(self):
@@ -71,13 +71,11 @@ class SystemScoreTable(Table):
         for metric, df in system_scores.groupby('metric'):
             row = [normalize_name('metric', metric)]
             for dataset, df2 in df.groupby('dataset'):
-                row.extend(self._get_model_scores(df2.reset_index()))
+                row.extend(self._get_model_scores(df2))
             try:
                 self.tabular.add_row(row)
             except TableRowSizeError:
                 logger.error('missing value for metric {}'.format(metric))
-            else:
-                self.tabular.add_hline()
 
     def _fix_missing(self, system_scores: DataFrame):
         values = system_scores.values
