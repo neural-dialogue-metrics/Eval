@@ -3,8 +3,11 @@ import shutil
 from itertools import product
 from pathlib import Path
 import logging
+
+from pylatex.utils import bold
+
 from corr.utils import find_all_data_files, UtterScoreDist
-from numpy import NaN
+from numpy import NaN, argmax
 from pandas import DataFrame
 from pylatex import Tabular, Table, Document, Command, Label, Marker, MultiColumn, TableRowSizeError, NoEscape
 from corr.normalize import normalize_name
@@ -55,13 +58,20 @@ class SystemScoreTable(Table):
             header.extend(model_names)
         return header
 
+    def _get_model_scores(self, df: DataFrame):
+        scores = list(map(str, df['system'].values))
+        max_pos = df['system'].values.argmax()
+        scores[max_pos] = bold(scores[max_pos])
+        return scores
+
     def _add_scores(self, system_scores: DataFrame):
         system_scores = self.preprocess(system_scores)
         # system_scores = self._fix_missing(system_scores)
 
         for metric, df in system_scores.groupby('metric'):
             row = [normalize_name('metric', metric)]
-            row.extend(df.system.values)
+            for dataset, df2 in df.groupby('dataset'):
+                row.extend(self._get_model_scores(df2.reset_index()))
             try:
                 self.tabular.add_row(row)
             except TableRowSizeError:
