@@ -24,7 +24,7 @@ class SystemScoreTable(Table):
 
         self.append(Command('centering'))
         self.add_caption(caption)
-        self.append(Label(Marker(name=NoEscape(label), prefix='tab')))
+        self.append(Label(Marker(name=label, prefix='tab')))
 
         self.models = sorted(system_scores.model.unique())
         self.datasets = sorted(system_scores.dataset.unique())
@@ -121,7 +121,7 @@ def make_table():
     df = df[df.model != 'random']
     table = SystemScoreTable(
         caption='不同数据集上的模型的各种指标得分',
-        label='system_scores_all',
+        label='systemScoresAll',
         system_scores=df,
     )
     output = Path('/home/cgsdfc/GraduateDesign/data/system_scores.tex')
