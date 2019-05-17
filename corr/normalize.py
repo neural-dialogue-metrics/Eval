@@ -41,6 +41,7 @@ default_normalizers = {
         'embedding_based': normalize_eb,
         'adem': str.upper,
         'distinct': capitalize_plus,
+        'utterance_len': '#words',
     }
 }
 
