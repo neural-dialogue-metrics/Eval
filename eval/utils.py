@@ -5,7 +5,6 @@ import numpy as np
 from pathlib import Path
 
 from eval.consts import *
-from eval.models import Model
 
 logger = logging.getLogger(__name__)
 
@@ -100,15 +99,4 @@ def should_make(target: Path, sources: Sequence[Path]):
     return all(
         src.exists() and src.stat().st_mtime > target.stat().st_mtime
         for src in sources
-    )
-
-
-def model_path(response_path):
-    parts = Path(response_path).parts
-    assert parts[-1].endswith('.txt'), 'path not pointing to valid output.txt'
-    dataset, model = parts[-3:-1]
-    return Model(
-        name=model.lower(),
-        trained_on=dataset.lower(),
-        responses=response_path,
     )

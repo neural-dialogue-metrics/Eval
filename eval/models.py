@@ -144,3 +144,14 @@ class SerbanModel(Model):
             context=context,
         )
         return subprocess.check_call(cmd, shell=True)
+
+
+def model_path(response_path):
+    parts = Path(response_path).parts
+    assert parts[-1].endswith('.txt'), 'path not pointing to valid output.txt'
+    dataset, model = parts[-3:-1]
+    return Model(
+        name=model.lower(),
+        trained_on=dataset.lower(),
+        responses=response_path,
+    )

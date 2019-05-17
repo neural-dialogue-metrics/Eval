@@ -3,8 +3,8 @@ import json
 import logging
 from pathlib import Path
 
-from eval.utils import Dataset, model_path
-from eval.models import Model
+from eval.utils import Dataset
+from eval.models import Model, model_path
 
 logger = logging.getLogger(__name__)
 
@@ -63,10 +63,10 @@ def parse_models_and_datasets(config):
     models = parse_models(config.get('models'))
     datasets = parse_dataset(config.get('datasets'))
 
-    return product_models_datasets(datasets, models)
+    return product_models_datasets(models, datasets)
 
 
-def product_models_datasets(datasets, models):
+def product_models_datasets(models, datasets):
     return [
         (model, dataset) for model, dataset in itertools.product(models, datasets)
         if model.trained_on == dataset.name
