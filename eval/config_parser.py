@@ -3,8 +3,8 @@ import json
 import logging
 from pathlib import Path
 
-from eval.repo import model_path
-from eval.utils import Model, Dataset
+from eval.utils import Dataset, model_path
+from eval.models import Model
 
 logger = logging.getLogger(__name__)
 

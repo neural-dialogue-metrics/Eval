@@ -2,8 +2,10 @@ import logging
 from pathlib import Path
 
 from eval.config_parser import product_models_datasets, parse_dataset
-from eval.repo import find_serban_models, all_datasets, get_dataset
-from eval.utils import load_template, get_random_gpu, SerbanModel
+from eval.repo import all_datasets, get_dataset
+from models import find_serban_models
+from eval.utils import load_template, get_random_gpu
+from eval.models import SerbanModel
 
 logger = logging.getLogger(__name__)
 train_template = load_template('serban_train')
