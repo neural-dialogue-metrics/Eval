@@ -4,11 +4,12 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import seaborn as sns
-from pandas import DataFrame
+from pandas import DataFrame, Series
 
 from corr.consts import PLOT_FILENAME
 from corr.normalize import normalize_name
 from corr.utils import UtterScoreDist, load_filename_data
+from seaborn import FacetGrid
 
 NAME = 'distplot_grid'
 
@@ -29,23 +30,23 @@ def do_distplot(ax, data: UtterScoreDist):
 
 def plot(data_index: DataFrame, prefix: Path):
     data_index = data_index.sort_values(by=['metric', 'model', 'dataset'])
+    plt.tight_layout()
 
     for metric, df2 in data_index.groupby('metric'):
         df2 = df2.reset_index()
-        n_subplots = len(df2.filename)
-        n_row = int(math.sqrt(n_subplots))
         output = get_output(prefix, metric)
+        g = FacetGrid(df2, row='model', col='dataset')
 
-        for i in range(n_subplots):
-            plot_number = i + 1
-            ax = plt.subplot(n_row, n_row, plot_number)
-            do_distplot(
-                ax=ax,
-                data=UtterScoreDist(df2.loc[i, 'filename'], scale=True, normalize=True),
-            )
-        logger.info('plotting to {}'.format(output))
+        def distplot_wrapper(filename: Series, **kwargs):
+            filename = filename.values[0]
+            data = UtterScoreDist(filename, scale=True, normalize=True)
+            sns.distplot(data.utterance, **kwargs)
+            plt.title('{} on {}'.format(data.model, data.dataset))
+
+        g.map(distplot_wrapper, 'filename')
         plt.suptitle(normalize_name('metric', metric))
-        plt.savefig(output)
+        logger.info('plotting to {}'.format(output))
+        g.savefig(output)
         plt.close('all')
 
 
