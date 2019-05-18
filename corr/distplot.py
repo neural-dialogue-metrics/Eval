@@ -7,7 +7,7 @@ import seaborn as sns
 from pandas import DataFrame, Series
 
 from corr.consts import PLOT_FILENAME
-from corr.normalize import normalize_name
+from corr.normalize import normalize_name, normalize_names_in_df
 from corr.utils import UtterScoreDist, load_filename_data
 from seaborn import FacetGrid
 
@@ -35,6 +35,7 @@ def plot(data_index: DataFrame, prefix: Path):
     for metric, df2 in data_index.groupby('metric'):
         df2 = df2.reset_index()
         output = get_output(prefix, metric)
+        df2 = normalize_names_in_df(df2)
         g = FacetGrid(df2, row='model', col='dataset')
 
         def distplot_wrapper(filename: Series, **kwargs):

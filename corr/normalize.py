@@ -1,5 +1,7 @@
 import functools
 
+from pandas import DataFrame
+
 
 class NameNormalizationError(Exception):
     def __init__(self, name):
@@ -58,3 +60,11 @@ def normalize_name(kind, name):
             return sub_normalizer(name)
         return sub_normalizer
     raise NameNormalizationError(name)
+
+
+def normalize_names_in_df(df: DataFrame, names=None):
+    names = names or default_normalizers.keys()
+    for name in names:
+        values = df[name].apply(lambda n: normalize_name(name, n))
+        df[name] = values
+    return df
