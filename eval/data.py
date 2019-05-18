@@ -25,7 +25,7 @@ def load_system_score(prefix: Path, remove_random_model=False, normalize_name=Fa
         del data['utterance']
     df = DataFrame.from_records(records)
     if remove_random_model:
-        df = df[df.model != 'random']
+        df = df[df.model != 'random'].reset_index()
     if normalize_name:
         all_cols = ['model', 'dataset', 'metric']
         for col in all_cols:

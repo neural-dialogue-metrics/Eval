@@ -58,3 +58,5 @@ OUTPUT_FILENAME = 'output.txt'
 
 GPU_LOW = 0
 GPU_HIGH = 1
+
+TIMES_NEW_ROMAN = 'Times New Roman'
