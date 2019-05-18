@@ -1,30 +1,22 @@
+import logging
+import math
 import re
 from pathlib import Path
 
+import seaborn as sns
 from pandas import DataFrame, Series
+from seaborn import FacetGrid
 
-from eval.data import load_system_score
+from corr.consts import PLOT_FILENAME
+from corr.normalize import normalize_names_in_df
 from eval.consts import TIMES_NEW_ROMAN
-from corr.consts import MODE_METRIC, MODE_MODEL
-import matplotlib.pyplot as plt
-import logging
+from eval.data import load_system_score
 
 logger = logging.getLogger(__name__)
 
 
 def seaborn_setup():
-    import seaborn as sns
     sns.set(color_codes=True, font=TIMES_NEW_ROMAN)
-    return sns
-
-
-class SystemScorePlotter:
-    def __init__(self, mode, dst_prefix: Path):
-        self.mode = mode
-        self.dst_prefix = dst_prefix
-
-    def add_column_group(self, df: DataFrame):
-        pass
 
 
 def exact(string):
@@ -76,7 +68,32 @@ def check_group(df: DataFrame):
         raise ValueError('there are mismatches')
 
 
+class SystemScorePlotter:
+    def __init__(self, mode, dst_prefix: Path):
+        self.mode = mode
+        self.dst_prefix = dst_prefix
+
+    def plot(self, df: DataFrame):
+        col_wrap = int(math.sqrt(len(group_matchers) + 1))
+        logger.info('col_wrap {}'.format(col_wrap))
+        g = FacetGrid(data=df, col='group', col_wrap=col_wrap)
+        # sns.pointplot()
+        g.map_dataframe(sns.pointplot, self.mode, 'system', hue='metric')
+        g.add_legend()
+        output = self.get_output()
+        logger.info('plotting to {}'.format(output))
+        g.savefig(output)
+
+    def get_output(self):
+        parent = self.dst_prefix / 'plot' / 'system' / self.mode
+        if not parent.exists():
+            parent.mkdir(parents=True)
+        return parent / PLOT_FILENAME
+
+
 if __name__ == '__main__':
+    seaborn_setup()
+    dst_prefix = Path('/home/cgsdfc/Metrics/Eval/data/v2')
     logging.basicConfig(level=logging.INFO)
     df = load_system_score(
         prefix=Path('/home/cgsdfc/Metrics/Eval/data/v2/score/db'),
@@ -84,4 +101,7 @@ if __name__ == '__main__':
     )
     df = df[df.metric != 'serban_ppl'].reset_index()
     df = df.assign(group=assign_group)
-    check_group(df)
+    df = normalize_names_in_df(df)
+
+    plotter = SystemScorePlotter('model', dst_prefix)
+    plotter.plot(df)
