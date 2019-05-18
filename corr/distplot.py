@@ -44,7 +44,8 @@ def plot(data_index: DataFrame, prefix: Path):
             plt.title('{} on {}'.format(data.model, data.dataset))
 
         g.map(distplot_wrapper, 'filename')
-        plt.suptitle(normalize_name('metric', metric))
+        g.set_xlabels('')
+        g.set_titles('{row_name} on {col_name}')
         logger.info('plotting to {}'.format(output))
         g.savefig(output)
         plt.close('all')
@@ -52,7 +53,7 @@ def plot(data_index: DataFrame, prefix: Path):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    sns.set(color_codes=True)
+    sns.set(color_codes=True, font='Times New Roman')
 
     dst_prefix = Path('/home/cgsdfc/Metrics/Eval/data/v2/plot')
 
