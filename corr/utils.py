@@ -83,6 +83,10 @@ def find_all_data_files(dir):
     return list(Path(dir).rglob('*.json'))
 
 
+def remove_ppl_and_random(df: DataFrame):
+    return df[(df.model != 'random') & (df.metric != 'serban_ppl')]
+
+
 def load_filename_data(data_dir):
     logger.info('loading filename data from {}'.format(data_dir))
     data_files = find_all_data_files(data_dir)
@@ -91,7 +95,8 @@ def load_filename_data(data_dir):
         metric, model, dataset = filename.parent.parts[-1:-4:-1]
         return locals()
 
-    return DataFrame.from_records([parse(p) for p in data_files])
+    df = DataFrame.from_records([parse(p) for p in data_files])
+    return remove_ppl_and_random(df)
 
 
 def remake_needed(target: Path, *sources, force=False):
@@ -127,6 +132,7 @@ def plot_main():
     parser.add_argument('-d', '--data-dir', help='where to look for score data')
     parser.add_argument('-p', '--prefix', help='where to store the plots')
     parser.add_argument('-f', '--force', action='store_true', help='remake everything regardless of timestamp')
+    parser.add_argument('-x', '--select', help='run a specific plot instead of all')
 
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
@@ -134,6 +140,9 @@ def plot_main():
     sns.set(font='Times New Roman')
 
     data_index = DataIndex(args.data_dir)
+    if args.select:
+        all_plotters = [args.select]
+
     for name in all_plotters:
         logging.info('running {}'.format(name))
         plot_fn = get_plots(name)
