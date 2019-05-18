@@ -56,14 +56,9 @@ docs/_build/
 
 # PyBuilder
 target/
+
 configs/
-save/
-save-v2/
-plots/
 notebook/
 paper/
 tmp/
-
-# figures
-*.png
-*.svg
+data/

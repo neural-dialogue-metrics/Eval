@@ -59,7 +59,6 @@ def do_plot(list_of_scores, mode, output, group_id):
             data=df,
             kind='reg',
         )
-        group_id = normalize_name('model', group_id)
         pair_grid.fig.suptitle('{} of {} models on {}'.format(x.metric, group_id, x.dataset))
     else:
         df = pd.DataFrame({
@@ -69,7 +68,6 @@ def do_plot(list_of_scores, mode, output, group_id):
             data=df,
             kind='reg',
         )
-        group_id = normalize_name('metric', group_id)
         pair_grid.fig.suptitle('{} metrics of {} on {}'.format(group_id, x.model, x.dataset))
 
     logger.info('plotting to {}'.format(output))
