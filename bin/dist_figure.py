@@ -1,10 +1,8 @@
-import argparse
 import math
 from pathlib import Path
 
-import pandas
 from pandas import DataFrame
-from pylatex import Figure, SubFigure, Document, NewLine, NoEscape, Command, Label, Marker
+from pylatex import Figure, SubFigure, NewLine, NoEscape, Command, Label, Marker
 
 from corr.consts import PLOT_FILENAME
 from corr.normalize import normalize_name
@@ -55,7 +53,7 @@ def make_figures(df: DataFrame, prefix: Path):
 
 def make_subfigures(images, caption='', label='', n=3):
     width = 1 / n
-    fig = Figure()
+    fig = Figure(position='H')
     fig.append(Command('centering'))
     image_iter = iter(images)
 
@@ -74,11 +72,12 @@ def make_subfigures(images, caption='', label='', n=3):
     return fig
 
 
-PREFIX = Path('/home/cgsdfc/Metrics/Eval/data/v2/')
-
 if __name__ == '__main__':
-    df = load_distplot_data(PREFIX / 'plot' / 'distplot')
+    src_prefix = Path('/home/cgsdfc/Metrics/Eval/data/v2/')
+    dst_prefix = Path('/home/cgsdfc/GraduateDesign/figure')
+
+    df = load_distplot_data(src_prefix / 'plot' / 'distplot')
     make_figures(
-        prefix=PREFIX,
+        prefix=dst_prefix,
         df=df,
     )
