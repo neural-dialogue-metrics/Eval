@@ -1,15 +1,14 @@
 import logging
-import math
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pandas import DataFrame, Series
+from seaborn import FacetGrid
 
 from corr.consts import PLOT_FILENAME
-from corr.normalize import normalize_name, normalize_names_in_df
+from corr.normalize import normalize_names_in_df
 from corr.utils import UtterScoreDist, load_filename_data
-from seaborn import FacetGrid
 
 NAME = 'distplot_grid'
 
@@ -30,7 +29,6 @@ def do_distplot(ax, data: UtterScoreDist):
 
 def plot(data_index: DataFrame, prefix: Path):
     data_index = data_index.sort_values(by=['metric', 'model', 'dataset'])
-    plt.tight_layout()
 
     for metric, df2 in data_index.groupby('metric'):
         df2 = df2.reset_index()
