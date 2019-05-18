@@ -4,11 +4,9 @@ from pathlib import Path
 import seaborn as sns
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
-from pandas import Series
-from sklearn.preprocessing import scale
 
 from corr.consts import PLOT_FILENAME
-from corr.utils import DataIndex
+from corr.utils import DataIndex, UtterScoreDist
 
 NAME = 'distplot'
 
@@ -19,13 +17,12 @@ def get_output(prefix: Path, triple):
     return prefix / NAME / triple.dataset / triple.model / triple.metric / PLOT_FILENAME
 
 
-def do_distplot(data, triple, output):
-    data = Series(data).transform(scale)
+def do_distplot(data: UtterScoreDist, output):
     fig = Figure()
     FigureCanvas(fig)
     ax = fig.add_subplot(111)
-    sns.distplot(data, ax=ax)
-    ax.set_title('{} of {} on {}'.format(triple.metric, triple.model, triple.dataset))
+    sns.distplot(data.utterance, ax=ax)
+    ax.set_title('{} of {} on {}'.format(data.metric, data.model, data.dataset))
     fig.savefig(str(output))
 
 
@@ -42,6 +39,6 @@ def plot(data_index: DataIndex, prefix: Path, force=False):
             logger.info('up to date: {}'.format(output))
             continue
 
-        data = data_index.get_data(triple.filename).utterance
+        data = data_index.get_data(triple.filename, scale=True, normalize=True)
         logger.info('plotting to {}'.format(output))
-        do_distplot(data, triple, output)
+        do_distplot(data, output)

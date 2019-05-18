@@ -1,4 +1,3 @@
-import json
 import shutil
 from itertools import product
 from pathlib import Path
@@ -7,10 +6,12 @@ import logging
 from pylatex.utils import bold
 
 from corr.utils import find_all_data_files, UtterScoreDist
-from numpy import NaN, argmax
 from pandas import DataFrame
-from pylatex import Tabular, Table, Document, Command, Label, Marker, MultiColumn, TableRowSizeError, NoEscape
+from pylatex import Tabular, Table, Command, Label, Marker, MultiColumn, TableRowSizeError
 from corr.normalize import normalize_name
+from eval.data import load_system_score
+
+__version__ = '0.0.1'
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ class SystemScoreTable(Table):
     order = ['metric', 'dataset', 'model']
 
     def __init__(self, caption, label, system_scores: DataFrame, places=None, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(position='H', **kwargs)
         if places is not None:
             self.places = places
 
@@ -99,13 +100,6 @@ class SystemScoreTable(Table):
     def preprocess(self, system_scores: DataFrame):
         system_scores = system_scores[system_scores.model != 'random']
         return system_scores.sort_values(self.order).round(self.places)
-
-
-def load_system_score(prefix: Path):
-    records = [json.load(file.open('r')) for file in prefix.rglob('*.json')]
-    for data in records:
-        del data['utterance']
-    return DataFrame.from_records(records)
 
 
 def new_url_schema(src_prefix: Path, dst_prefix: Path):

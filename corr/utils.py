@@ -7,8 +7,9 @@ import pandas as pd
 from pandas import DataFrame
 from sklearn.preprocessing import scale as sklearn_scale
 
-from corr.consts import SAMPLE_SIZE, RANDOM_STATE
+from corr.consts import SAMPLE_SIZE, RANDOM_STATE, TRIPLE_NAMES
 from eval.consts import SEPARATOR
+from corr.normalize import normalize_name
 
 logger = logging.getLogger(__name__)
 
@@ -35,14 +36,14 @@ class DataIndex:
     def iter_triples(self):
         return self.index.itertuples(index=False, name='Triple')
 
-    def get_data(self, path, scale=False):
+    def get_data(self, path, **kwargs):
         if path in self._cache:
             return self._cache[path]
-        return self._cache.setdefault(path, UtterScoreDist.from_json_file(path, scale))
+        return self._cache.setdefault(path, UtterScoreDist(path, **kwargs))
 
 
 class Triple:
-    def __init__(self, model, dataset, metric):
+    def __init__(self, model, dataset, metric, **kwargs):
         self.model = model
         self.dataset = dataset
         self.metric = metric
@@ -55,32 +56,31 @@ class Triple:
     def name(self):
         return SEPARATOR.join((self.model, self.dataset, self.metric))
 
+    def normalize_name_inplace(self):
+        for name in TRIPLE_NAMES:
+            normalized = normalize_name(name, getattr(self, name))
+            setattr(self, name, normalized)
+
 
 class UtterScoreDist(Triple):
     """Utterance-Score Distribution"""
 
-    def __init__(self, model, dataset, metric, system, utterance, scale=False):
-        super(UtterScoreDist, self).__init__(model, dataset, metric)
-        self.system = system
+    def __init__(self, filename: Path, scale=False, normalize=False):
+        data = json.load(filename.open())
+        super(UtterScoreDist, self).__init__(**data)
+        self.system = data['system']
         self.scaled = scale
+        self.normalized = normalize
+        utterance = data['utterance']
         if scale:
             utterance = sklearn_scale(utterance)
         self.utterance = utterance
-
-    @classmethod
-    def from_json_file(cls, filename, scale=False):
-        data = json.load(open(filename))
-        return cls(**data, scale=scale)
+        if normalize:
+            self.normalize_name_inplace()
 
 
 def find_all_data_files(dir):
-    dir = Path(dir)
-    data_files = filter(lambda path: DATA_FILENAME_RE.match(path.name), dir.glob('*.json'))
-    return list(data_files)
-
-
-def is_fully_substituted(url):
-    return re.search(r'<[\w_\d]+>', url) is None
+    return list(Path(dir).rglob('*.json'))
 
 
 def load_filename_data(data_dir):
@@ -88,18 +88,10 @@ def load_filename_data(data_dir):
     data_files = find_all_data_files(data_dir)
 
     def parse(filename: Path):
-        model, dataset, metric = filename.stem.split(SEPARATOR)
+        metric, model, dataset = filename.parent.parts[-1:-4:-1]
         return locals()
 
     return DataFrame.from_records([parse(p) for p in data_files])
-
-
-def substitute_url(url: str, check_full=False, **kwargs):
-    for name, value in kwargs.items():
-        url = url.replace('<{}>'.format(name), value)
-    if check_full and not is_fully_substituted(url):
-        raise ValueError('url not fully substituted: {}'.format(url))
-    return url
 
 
 def remake_needed(target: Path, *sources, force=False):

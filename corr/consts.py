@@ -7,4 +7,6 @@ RANDOM_STATE = 1
 
 MODE_MODEL = 'model'
 MODE_METRIC = 'metric'
-PLOT_FILENAME = 'plot.png'
+PLOT_FILENAME = 'plot.pdf'
+
+TRIPLE_NAMES = ('model', 'dataset', 'metric')

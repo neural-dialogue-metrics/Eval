@@ -10,6 +10,7 @@ import pandas as pd
 import seaborn as sns
 
 from corr.consts import *
+from corr.normalize import normalize_name
 from corr.utils import DataIndex
 from corr.utils import remake_needed
 
@@ -47,14 +48,6 @@ def skip_exception(fn):
     return do_skip
 
 
-# shorten name for embedding_based.
-def shorten_name(name):
-    if name.startswith('embedding_based'):
-        parts = name.split('_')[2:]
-        return '_'.join(parts)
-    return name
-
-
 @skip_exception
 def do_plot(list_of_scores, mode, output, group_id):
     x = list_of_scores[0]
@@ -66,15 +59,17 @@ def do_plot(list_of_scores, mode, output, group_id):
             data=df,
             kind='reg',
         )
+        group_id = normalize_name('model', group_id)
         pair_grid.fig.suptitle('{} of {} models on {}'.format(x.metric, group_id, x.dataset))
     else:
         df = pd.DataFrame({
-            shorten_name(item.metric): item.utterance for item in list_of_scores
+            item.metric: item.utterance for item in list_of_scores
         })
         pair_grid = sns.pairplot(
             data=df,
             kind='reg',
         )
+        group_id = normalize_name('metric', group_id)
         pair_grid.fig.suptitle('{} metrics of {} on {}'.format(group_id, x.model, x.dataset))
 
     logger.info('plotting to {}'.format(output))
@@ -84,7 +79,7 @@ def do_plot(list_of_scores, mode, output, group_id):
 
 def get_and_scale_data(data_index, df):
     return [
-        data_index.get_data(row.filename, scale=True)
+        data_index.get_data(row.filename, scale=True, normalize=True)
         for row in df.itertuples(index=False, name='Triple')
     ]
 

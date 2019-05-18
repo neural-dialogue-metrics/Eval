@@ -7,7 +7,6 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import pearsonr
-from sklearn.preprocessing import scale
 
 from corr.consts import *
 from corr.utils import DataIndex
@@ -38,11 +37,9 @@ def cn_2(iterable):
 
 
 def do_plot(x: UtterScoreDist, y: UtterScoreDist, mode: str, output):
-    joint_grid = sns.jointplot(
-        x=scale(x.utterance),
-        y=scale(y.utterance),
-    )
+    joint_grid = sns.jointplot(x=x.utterance, y=y.utterance)
     joint_grid.annotate(func=pearsonr, stat="Pearson's R")
+
     if mode == MODE_MODEL:
         joint_grid.fig.suptitle('{model} on {dataset}'.format(model=x.model, dataset=x.dataset))
         joint_grid.set_axis_labels(xlabel=x.metric, ylabel=y.metric)
@@ -71,8 +68,8 @@ def plot(data_index: DataIndex, prefix: Path, force=False):
                     logger.info('up to date: {}'.format(output))
                     continue
                 try:
-                    do_plot(x=data_index.get_data(x.filename),
-                            y=data_index.get_data(y.filename), mode=mode, output=output)
+                    do_plot(x=data_index.get_data(x.filename, normalize=True, scale=True),
+                            y=data_index.get_data(y.filename, normalize=True, scale=True), mode=mode, output=output)
                 except Exception:
                     traceback.print_exc()
                     logging.info('x: {}'.format(x))
