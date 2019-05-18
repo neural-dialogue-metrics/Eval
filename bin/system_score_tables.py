@@ -102,12 +102,19 @@ class SystemScoreTable(Table):
         return system_scores.sort_values(self.order).round(self.places)
 
 
+class TablePerDataset(Table):
+    _latex_name = 'table'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
 def new_url_schema(src_prefix: Path, dst_prefix: Path):
     # data/v2/score/db/<dataset>/<model>/<metric>/
     if not dst_prefix.exists():
         dst_prefix.mkdir(parents=True)
     files = find_all_data_files(src_prefix)
-    data = [(file, UtterScoreDist.from_json_file(file)) for file in files]
+    data = [(file, UtterScoreDist(file)) for file in files]
     for file, dist in data:
         dst_url = dst_prefix / dist.dataset / dist.model / dist.metric
         if not dst_url.exists():
