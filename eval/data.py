@@ -4,15 +4,13 @@ from pathlib import Path
 
 import pandas as pd
 import seaborn as sns
-from corr.utils import logger
-from eval.consts import SAMPLE_SIZE, RANDOM_STATE, SEPARATOR, TRIPLE_NAMES, SCORE_DB_DIR, TIMES_NEW_ROMAN
-
-from pandas import DataFrame
-
 from eval.config_parser import product_models_datasets
-
-from eval.normalize import normalize_name as _normalize_name, normalize_name
+from eval.consts import SAMPLE_SIZE, RANDOM_STATE, SEPARATOR, TRIPLE_NAMES, SCORE_DB_DIR, TIMES_NEW_ROMAN
+from eval.normalize import normalize_name as _normalize_name
+from pandas import DataFrame
 from sklearn.preprocessing import scale as sklearn_scale
+
+logger = logging.getLogger(__name__)
 
 
 def get_model_dataset_pairs(models=None, datasets=None):
@@ -83,7 +81,7 @@ class Triple:
 
     def normalize_name_inplace(self):
         for name in TRIPLE_NAMES:
-            normalized = normalize_name(name, getattr(self, name))
+            normalized = _normalize_name(name, getattr(self, name))
             setattr(self, name, normalized)
 
 
