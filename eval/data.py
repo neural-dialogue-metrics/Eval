@@ -1,6 +1,7 @@
 import json
 import logging
 from pathlib import Path
+from typing import Tuple
 
 import pandas as pd
 import seaborn as sns
@@ -24,13 +25,32 @@ def get_model_dataset_pairs(models=None, datasets=None):
     return product_models_datasets(models, datasets)
 
 
-def load_system_score(prefix: Path, remove_random_model=False, normalize_name=False):
+default_removes = (
+    ('model', 'random'),
+    ('metric', 'serban_ppl',)
+)
+
+
+def _remove_columns(df: DataFrame, remove: Tuple[str, str]):
+    for col_name, col_val in remove:
+        df = df[df[col_name] != col_val]
+    return df
+
+
+def load_system_score(prefix: Path = None,
+                      normalize_name=False,
+                      remove_random_model=False,
+                      remove_serban_ppl=False):
+    if prefix is None:
+        prefix = Path(SCORE_DB_DIR)
     records = [json.load(file.open('r')) for file in prefix.rglob('*.json')]
     for data in records:
         del data['utterance']
     df = DataFrame.from_records(records)
     if remove_random_model:
         df = df[df.model != 'random'].reset_index()
+    if remove_serban_ppl:
+        df = df[df.metric != 'serban_ppl'].reset_index()
     if normalize_name:
         all_cols = ['model', 'dataset', 'metric']
         for col in all_cols:

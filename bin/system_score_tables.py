@@ -129,9 +129,7 @@ def migrate_url_schema():
 
 
 def make_table():
-    df = load_system_score(
-        prefix=Path('/home/cgsdfc/Metrics/Eval/data/v2/score/db')
-    )
+    df = load_system_score(prefix=Path('/home/cgsdfc/Metrics/Eval/data/v2/score/db'))
     df = df[df.model != 'random']
     table = SystemScoreTable(
         caption='不同数据集上的模型的各种指标得分',

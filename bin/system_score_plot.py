@@ -44,10 +44,7 @@ if __name__ == '__main__':
     seaborn_setup()
     dst_prefix = Path('/home/cgsdfc/Metrics/Eval/data/v2')
     logging.basicConfig(level=logging.INFO)
-    df = load_system_score(
-        prefix=Path('/home/cgsdfc/Metrics/Eval/data/v2/score/db'),
-        remove_random_model=True,
-    )
+    df = load_system_score(prefix=Path('/home/cgsdfc/Metrics/Eval/data/v2/score/db'), remove_random_model=True)
     df = df[df.metric != 'serban_ppl']
     df = MetricGroup().add_group_column_to_df(df)
     df = normalize_names_in_df(df)
