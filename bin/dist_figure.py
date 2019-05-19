@@ -4,8 +4,8 @@ from pathlib import Path
 from pandas import DataFrame
 from pylatex import Figure, SubFigure, NewLine, NoEscape, Command, Label, Marker
 
-from corr.consts import PLOT_FILENAME
-from corr.normalize import normalize_name
+from eval.consts import PLOT_FILENAME
+from eval.normalize import normalize_name
 
 
 def get_output(prefix: Path, metric):

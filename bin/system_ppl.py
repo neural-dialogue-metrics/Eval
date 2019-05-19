@@ -1,6 +1,6 @@
 from pathlib import Path
 import argparse
-from corr.utils import UtterScoreDist
+from eval.data import UtterScoreDist
 import logging
 import pprint as pp
 

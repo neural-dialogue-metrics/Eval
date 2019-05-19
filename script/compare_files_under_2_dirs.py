@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from corr.utils import find_all_data_files
+from eval.data import find_all_data_files
 import argparse
 
 if __name__ == '__main__':

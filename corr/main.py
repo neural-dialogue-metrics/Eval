@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import logging
 from pathlib import Path
 import seaborn as sns
-from corr.utils import DataIndex
+from eval.data import DataIndex
 import argparse
 
 if __name__ == '__main__':

@@ -60,3 +60,13 @@ GPU_LOW = 0
 GPU_HIGH = 1
 
 TIMES_NEW_ROMAN = 'Times New Roman'
+PLOT_FORMAT = '.png'
+OUTPUT_FILE = 'plot.png'
+SAMPLE_SIZE = 1000
+RANDOM_STATE = 1
+MODE_MODEL = 'model'
+MODE_METRIC = 'metric'
+PLOT_FILENAME = 'plot.pdf'
+TRIPLE_NAMES = ('model', 'dataset', 'metric')
+SCORE_DB_DIR = '/home/cgsdfc/Metrics/Eval/data/v2/score/db'
+DATA_V2_ROOT = '/home/cgsdfc/Metrics/Eval/data/v2'

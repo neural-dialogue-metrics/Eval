@@ -6,9 +6,9 @@ import seaborn as sns
 from pandas import DataFrame, Series
 from seaborn import FacetGrid
 
-from corr.consts import PLOT_FILENAME
-from corr.normalize import normalize_names_in_df
-from corr.utils import UtterScoreDist, load_filename_data
+from eval.consts import PLOT_FILENAME
+from eval.normalize import normalize_names_in_df
+from eval.data import UtterScoreDist, load_filename_data
 
 NAME = 'distplot_grid'
 

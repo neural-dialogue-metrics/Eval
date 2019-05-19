@@ -1,5 +1,5 @@
 from pathlib import Path
-from corr.normalize import normalize_name
+from eval.normalize import normalize_name
 
 from pylatex import Figure, Label, Marker, NoEscape
 

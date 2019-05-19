@@ -2,11 +2,11 @@ import logging
 from pathlib import Path
 
 import seaborn as sns
+from eval.consts import PLOT_FILENAME, DATA_V2_ROOT
+from eval.data import UtterScoreDist, load_filename_data
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
-
-from corr.consts import PLOT_FILENAME
-from corr.utils import DataIndex, UtterScoreDist
+from pandas import DataFrame
 
 NAME = 'distplot'
 
@@ -22,28 +22,24 @@ def do_distplot(data: UtterScoreDist, output):
     FigureCanvas(fig)
     ax = fig.add_subplot(111)
     sns.distplot(data.utterance, ax=ax)
-    data.normalize_name_inplace()
     ax.set_title('{} of {} on {}'.format(data.metric, data.model, data.dataset))
+    logger.info('plotting to {}'.format(output))
     fig.savefig(str(output))
 
 
-def plot(data_index: DataIndex, prefix: Path, force=False):
-    for triple in data_index.iter_triples():
+def plot(df: DataFrame, prefix: Path):
+    for triple in df.itertuples(index=False):
         output = get_output(prefix, triple)
-
         if not output.parent.is_dir():
             output.parent.mkdir(parents=True)
 
-        source: Path = triple.filename
-        target = output
-        if not force and target.exists() and target.stat().st_mtime > source.stat().st_mtime:
-            logger.info('up to date: {}'.format(output))
-            continue
-
-        data = data_index.get_data(triple.filename, scale=True, normalize=True)
-        logger.info('plotting to {}'.format(output))
+        data = UtterScoreDist(triple.filename, scale=True, normalize=True)
         do_distplot(data, output)
 
 
 if __name__ == '__main__':
-    pass
+    logging.basicConfig(level=logging.INFO)
+    df = load_filename_data()
+    prefix = Path(DATA_V2_ROOT).joinpath('plot')
+
+    plot(df, prefix)

@@ -6,11 +6,10 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import seaborn as sns
+from eval.consts import MODE_MODEL, MODE_METRIC, PLOT_FILENAME
 from scipy.stats import pearsonr
 
-from corr.consts import *
-from corr.utils import DataIndex
-from corr.utils import UtterScoreDist
+from eval.data import DataIndex, UtterScoreDist
 
 NAME = 'jointplot'
 logger = logging.getLogger(__name__)

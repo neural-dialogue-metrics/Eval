@@ -7,16 +7,11 @@ import seaborn as sns
 from pandas import DataFrame, Series
 from seaborn import FacetGrid
 
-from corr.consts import PLOT_FILENAME
-from corr.normalize import normalize_names_in_df
-from eval.consts import TIMES_NEW_ROMAN
-from eval.data import load_system_score
+from eval.consts import PLOT_FILENAME
+from eval.normalize import normalize_names_in_df
+from eval.data import load_system_score, seaborn_setup
 
 logger = logging.getLogger(__name__)
-
-
-def seaborn_setup():
-    sns.set(color_codes=True, font=TIMES_NEW_ROMAN)
 
 
 def exact(string):
