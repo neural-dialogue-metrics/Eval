@@ -100,3 +100,9 @@ def should_make(target: Path, sources: Sequence[Path]):
         src.exists() and src.stat().st_mtime > target.stat().st_mtime
         for src in sources
     )
+
+
+def make_parent_dirs(filename: Path):
+    parent: Path = filename.parent
+    parent.mkdir(parents=True, exist_ok=True)
+    return filename

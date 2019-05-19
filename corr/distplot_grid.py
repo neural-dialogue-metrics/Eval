@@ -29,6 +29,13 @@ def do_distplot(ax, data: UtterScoreDist):
     ax.set_title('{} on {}'.format(data.model, data.dataset))
 
 
+def distplot_wrapper(filename: Series, **kwargs):
+    filename = filename.values[0]
+    data = UtterScoreDist(filename, normalize=True, scale=True)
+    sns.distplot(data.utterance, **kwargs)
+    plt.title('{} on {}'.format(data.model, data.dataset))
+
+
 def plot(data_index: DataFrame, prefix: Path):
     data_index = data_index.sort_values(by=['metric', 'model', 'dataset'])
 
@@ -37,12 +44,6 @@ def plot(data_index: DataFrame, prefix: Path):
         output = get_output(prefix, metric)
         df2 = normalize_names_in_df(df2)
         g = FacetGrid(df2, row='model', col='dataset')
-
-        def distplot_wrapper(filename: Series, **kwargs):
-            filename = filename.values[0]
-            data = UtterScoreDist(filename, normalize=True, scale=True)
-            sns.distplot(data.utterance, **kwargs)
-            plt.title('{} on {}'.format(data.model, data.dataset))
 
         g.map(distplot_wrapper, 'filename')
         g.set_xlabels('')

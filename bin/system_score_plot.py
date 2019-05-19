@@ -3,13 +3,14 @@ import math
 from pathlib import Path
 
 import seaborn as sns
-from eval.group import group_matchers, assign_group
+from eval.group import MetricGroup
 from pandas import DataFrame
 from seaborn import FacetGrid
 
 from eval.consts import PLOT_FILENAME
 from eval.normalize import normalize_names_in_df
 from eval.data import load_system_score, seaborn_setup
+from eval.group import get_col_wrap
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,7 @@ class SystemScorePlotter:
         self.dst_prefix = dst_prefix
 
     def plot(self, df: DataFrame):
-        col_wrap = int(math.sqrt(len(group_matchers) + 1))
+        col_wrap = get_col_wrap(MetricGroup.num_groups())
         logger.info('col_wrap {}'.format(col_wrap))
         g = FacetGrid(data=df, col='group', col_wrap=col_wrap)
         # sns.pointplot()
@@ -47,8 +48,8 @@ if __name__ == '__main__':
         prefix=Path('/home/cgsdfc/Metrics/Eval/data/v2/score/db'),
         remove_random_model=True,
     )
-    df = df[df.metric != 'serban_ppl'].reset_index()
-    df = df.assign(group=assign_group)
+    df = df[df.metric != 'serban_ppl']
+    df = MetricGroup().add_group_column_to_df(df)
     df = normalize_names_in_df(df)
 
     plotter = SystemScorePlotter('model', dst_prefix)

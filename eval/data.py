@@ -139,5 +139,8 @@ def remake_needed(target: Path, *sources, force=False):
 
 
 def seaborn_setup():
-    logging.basicConfig(level=logging.INFO)
     sns.set(color_codes=True, font=TIMES_NEW_ROMAN)
+
+
+def get_schema_name(__file__):
+    return Path(__file__).stem
