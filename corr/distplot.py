@@ -1,63 +1,49 @@
 import logging
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import seaborn as sns
-from pandas import DataFrame, Series
-from seaborn import FacetGrid
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 from corr.consts import PLOT_FILENAME
-from corr.normalize import normalize_names_in_df
-from corr.utils import UtterScoreDist, load_filename_data
+from corr.utils import DataIndex, UtterScoreDist
 
-NAME = 'distplot_grid'
+NAME = 'distplot'
 
 logger = logging.getLogger(__name__)
 
 
-def get_output(prefix: Path, metric):
-    output = prefix / NAME / metric / PLOT_FILENAME
-    if not output.parent.exists():
-        output.parent.mkdir(parents=True)
-    return output
+def get_output(prefix: Path, triple):
+    return prefix / NAME / triple.dataset / triple.model / triple.metric / PLOT_FILENAME
 
 
-def do_distplot(ax, data: UtterScoreDist):
+def do_distplot(data: UtterScoreDist, output):
+    fig = Figure()
+    FigureCanvas(fig)
+    ax = fig.add_subplot(111)
     sns.distplot(data.utterance, ax=ax)
-    ax.set_title('{} on {}'.format(data.model, data.dataset))
+    data.normalize_name_inplace()
+    ax.set_title('{} of {} on {}'.format(data.metric, data.model, data.dataset))
+    fig.savefig(str(output))
 
 
-def plot(data_index: DataFrame, prefix: Path):
-    data_index = data_index.sort_values(by=['metric', 'model', 'dataset'])
+def plot(data_index: DataIndex, prefix: Path, force=False):
+    for triple in data_index.iter_triples():
+        output = get_output(prefix, triple)
 
-    for metric, df2 in data_index.groupby('metric'):
-        df2 = df2.reset_index()
-        output = get_output(prefix, metric)
-        df2 = normalize_names_in_df(df2)
-        g = FacetGrid(df2, row='model', col='dataset')
+        if not output.parent.is_dir():
+            output.parent.mkdir(parents=True)
 
-        def distplot_wrapper(filename: Series, **kwargs):
-            filename = filename.values[0]
-            data = UtterScoreDist(filename, normalize=True)
-            sns.distplot(data.utterance, **kwargs)
-            plt.title('{} on {}'.format(data.model, data.dataset))
+        source: Path = triple.filename
+        target = output
+        if not force and target.exists() and target.stat().st_mtime > source.stat().st_mtime:
+            logger.info('up to date: {}'.format(output))
+            continue
 
-        g.map(distplot_wrapper, 'filename')
-        g.set_xlabels('')
-        g.set_titles('{row_name} on {col_name}')
+        data = data_index.get_data(triple.filename, scale=True, normalize=True)
         logger.info('plotting to {}'.format(output))
-        g.savefig(output)
-        plt.close('all')
+        do_distplot(data, output)
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
-    sns.set(color_codes=True, font='Times New Roman')
-
-    dst_prefix = Path('/home/cgsdfc/Metrics/Eval/data/v2/plot')
-
-    df = load_filename_data(
-        Path('/home/cgsdfc/Metrics/Eval/data/v2/score/db')
-    )
-
-    plot(df, dst_prefix)
+    pass
