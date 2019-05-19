@@ -2,6 +2,7 @@ import logging
 import re
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 from corr.distplot_grid import distplot_wrapper
 from eval.consts import PLOT_FILENAME, DATA_V2_ROOT
 from eval.data import load_filename_data, seaborn_setup, get_schema_name
@@ -46,12 +47,14 @@ def plot(df: DataFrame, prefix: Path):
         output = get_output(prefix, group)
         logger.info('plotting to {}'.format(output))
         g.savefig(output)
+        plt.close('all')
 
 
 def preprocess() -> DataFrame:
     df = load_filename_data()
     df = df[(df.model == MODEL) & (df.dataset == DATASET) & (df.metric != 'serban_ppl')]
     df = MyGroup().add_group_column_to_df(df)
+    df = df.sort_values('metric')
     df = normalize_names_in_df(df)
     return df
 
