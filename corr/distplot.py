@@ -12,6 +12,8 @@ NAME = 'distplot'
 
 logger = logging.getLogger(__name__)
 
+__version__ = '0.0.1'
+
 
 def get_output(prefix: Path, triple):
     return prefix / NAME / triple.dataset / triple.model / triple.metric / PLOT_FILENAME

@@ -13,6 +13,8 @@ from eval.data import load_system_score, seaborn_setup
 
 logger = logging.getLogger(__name__)
 
+__version__ = '0.0.1'
+
 
 def exact(string):
     return lambda s: s == string

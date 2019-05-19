@@ -14,6 +14,8 @@ NAME = 'distplot_grid'
 
 logger = logging.getLogger(__name__)
 
+__version__ = '0.0.1'
+
 
 def get_output(prefix: Path, metric):
     output = prefix / NAME / metric / PLOT_FILENAME
@@ -38,7 +40,7 @@ def plot(data_index: DataFrame, prefix: Path):
 
         def distplot_wrapper(filename: Series, **kwargs):
             filename = filename.values[0]
-            data = UtterScoreDist(filename, normalize=True)
+            data = UtterScoreDist(filename, normalize=True, scale=True)
             sns.distplot(data.utterance, **kwargs)
             plt.title('{} on {}'.format(data.model, data.dataset))
 
