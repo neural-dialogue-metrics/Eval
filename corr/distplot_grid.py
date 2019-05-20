@@ -8,7 +8,7 @@ from seaborn import FacetGrid
 
 from eval.consts import PLOT_FILENAME
 from eval.normalize import normalize_names_in_df
-from eval.data import UtterScoreDist, load_filename_data
+from eval.data import UtterScoreDist, load_score_db_index
 
 NAME = 'distplot_grid'
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
     dst_prefix = Path('/home/cgsdfc/Metrics/Eval/data/v2/plot')
 
-    df = load_filename_data(
+    df = load_score_db_index(
         Path('/home/cgsdfc/Metrics/Eval/data/v2/score/db')
     )
 

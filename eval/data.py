@@ -73,7 +73,7 @@ class DataIndex:
     @property
     def index(self):
         if self._index is None:
-            self._index = load_filename_data(self.data_dir)
+            self._index = load_score_db_index(self.data_dir)
         return self._index
 
     def iter_triples(self):
@@ -130,7 +130,7 @@ def remove_ppl_and_random(df: DataFrame):
     return df[(df.model != 'random') & (df.metric != 'serban_ppl')]
 
 
-def load_filename_data(data_dir=None):
+def load_score_db_index(data_dir=None):
     if data_dir is None:
         data_dir = SCORE_DB_DIR
     logger.info('loading filename data from {}'.format(data_dir))

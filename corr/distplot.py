@@ -3,7 +3,7 @@ from pathlib import Path
 
 import seaborn as sns
 from eval.consts import PLOT_FILENAME, DATA_V2_ROOT
-from eval.data import UtterScoreDist, load_filename_data, seaborn_setup
+from eval.data import UtterScoreDist, load_score_db_index, seaborn_setup
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 from pandas import DataFrame
@@ -41,7 +41,7 @@ def plot(df: DataFrame, prefix: Path):
 
 if __name__ == '__main__':
     seaborn_setup()
-    df = load_filename_data()
+    df = load_score_db_index()
     prefix = Path(DATA_V2_ROOT).joinpath('plot')
 
     plot(df, prefix)

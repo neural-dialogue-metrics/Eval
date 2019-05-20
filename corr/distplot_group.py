@@ -5,7 +5,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from corr.distplot_grid import distplot_wrapper
 from eval.consts import PLOT_FILENAME, DATA_V2_ROOT
-from eval.data import load_filename_data, seaborn_setup, get_schema_name
+from eval.data import load_score_db_index, seaborn_setup, get_schema_name
 from eval.group import get_col_wrap, MetricGroup, contains, re_match
 from eval.normalize import normalize_names_in_df
 from eval.utils import make_parent_dirs
@@ -51,7 +51,7 @@ def plot(df: DataFrame, prefix: Path):
 
 
 def preprocess() -> DataFrame:
-    df = load_filename_data()
+    df = load_score_db_index()
     df = df[(df.model == MODEL) & (df.dataset == DATASET) & (df.metric != 'serban_ppl')]
     df = MyGroup().add_group_column_to_df(df)
     df = df.sort_values('metric')

@@ -12,6 +12,7 @@ import seaborn as sns
 from eval.data import DataIndex, remake_needed
 from eval.consts import MODE_MODEL, MODE_METRIC, PLOT_FILENAME
 
+# Outdated scripts
 NAME = 'pairplot'
 
 GROUP_MAP = {

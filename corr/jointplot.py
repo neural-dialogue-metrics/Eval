@@ -11,6 +11,7 @@ from scipy.stats import pearsonr
 
 from eval.data import DataIndex, UtterScoreDist
 
+# Outdated-script
 NAME = 'jointplot'
 logger = logging.getLogger(__name__)
 
