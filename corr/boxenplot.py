@@ -9,8 +9,8 @@ from eval.normalize import normalize_names_in_df
 from eval.utils import make_parent_dirs
 from pandas import DataFrame
 
-# boxen or box
-NAME = 'box'
+NAME = 'boxplot'
+
 
 __version__ = '0.2.0'
 
@@ -26,7 +26,8 @@ def preprocess() -> DataFrame:
 
 
 def do_plot(df: DataFrame, x_var):
-    g = sns.catplot(x=x_var, y='system', kind=NAME, data=df, ci='sd')
+    kind = NAME.replace('plot', '')
+    g = sns.catplot(x=x_var, y='system', kind=kind, data=df, ci='sd')
     g.set_xlabels('')
     g.set_ylabels('')
     return g
