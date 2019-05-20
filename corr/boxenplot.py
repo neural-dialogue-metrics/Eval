@@ -12,7 +12,7 @@ from pandas import DataFrame
 # boxen or box
 NAME = 'box'
 
-__version__ = '0.0.1'
+__version__ = '0.2.0'
 
 
 def get_output(prefix: Path, metric):
@@ -26,7 +26,7 @@ def preprocess() -> DataFrame:
 
 
 def do_plot(df: DataFrame, x_var):
-    g = sns.catplot(x=x_var, y='system', kind=NAME, data=df)
+    g = sns.catplot(x=x_var, y='system', kind=NAME, data=df, ci='sd')
     g.set_xlabels('')
     g.set_ylabels('')
     return g
