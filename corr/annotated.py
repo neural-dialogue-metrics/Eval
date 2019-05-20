@@ -1,7 +1,10 @@
+import logging
 from pathlib import Path
 
 from eval.data import UtterScoreDist
 from eval.consts import REFERENCES, CONTEXTS, RESPONSES
+from eval.consts import DATA_V2_ROOT
+
 from eval.data import load_score_db_index
 from pandas import DataFrame, Series
 
@@ -13,7 +16,7 @@ FILENAME = 'chat.json'
 
 DATASET_FILES = ('contexts', 'references')
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 
 def get_output(prefix: Path, dataset: str, model: str):
@@ -49,7 +52,7 @@ def load_examples_index(prefix: Path = None, remove_random_model=False) -> DataF
     return df
 
 
-def make_annotated(df: DataFrame):
+def make_annotated(df: DataFrame, prefix: Path):
     for (dataset, model), df2 in df.groupby(['dataset', 'model']):
         series: Series = df2.iloc[0][['context_file', 'reference_file', 'response_file']]
         series = series.apply(lambda file: Path(file).read_text().splitlines())
@@ -58,7 +61,9 @@ def make_annotated(df: DataFrame):
             score = UtterScoreDist(row.score_file)
             columns[row.metric] = score.utterance
         df3 = DataFrame(data=columns).rename(columns=lambda str: str.replace('_file', ''))
-        print(df3)
+        output = get_output(prefix, dataset, model)
+        logging.info('writing to {}'.format(output))
+        df3.to_json(path_or_buf=output, orient='records')
 
 
 def load_example_score_index():
@@ -72,6 +77,19 @@ def load_example_score_index():
     return df3.reset_index()
 
 
+def load_annotated_index(prefix: Path = None):
+    if prefix is None:
+        prefix = Path(DATA_V2_ROOT) / 'example' / NAMESPACE
+    files = list(prefix.rglob('*.json'))
+
+    def parse(path: Path):
+        dataset, model = path.parts[-3:-1]
+        return locals()
+
+    return DataFrame.from_records(map(parse, files))
+
+
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     df = load_example_score_index()
-    make_annotated(df)
+    make_annotated(df, prefix=Path(DATA_V2_ROOT).joinpath('example'))
