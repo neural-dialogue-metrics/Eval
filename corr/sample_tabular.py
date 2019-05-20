@@ -3,8 +3,9 @@ import logging
 from pathlib import Path
 
 from eval.utils import make_parent_dirs
-from pylatex import Tabularx
-from pylatex.utils import bold
+from pylatex import Tabularx, Table, Label, Marker, Command, LongTabularx
+from pylatex.utils import bold, NoEscape
+from eval.normalize import normalize_name
 
 column2text = {
     'context': '消息：',
@@ -12,18 +13,39 @@ column2text = {
     'response': '响应：',
 }
 
+TABULAR_TEX = 'tabular.tex'
+TABLE_TEX = 'table.tex'
 
-class PieceTabular(Tabularx):
-    _latex_name = 'tabularx'
 
-    def __init__(self, data: list, **kwargs):
-        super().__init__(table_spec='rX', booktabs=True, **kwargs)
-        self.add_hline()
-        for item in data:
-            for key, value in column2text.items():
-                cells = [bold(value), item[key]]
-                self.add_row(cells)
-            self.add_hline()
+def fill_data_in_tabular(data: list, truncate=None):
+    if truncate:
+        data = data[:truncate]
+
+    tabular = LongTabularx(
+        table_spec='rX',
+        width_argument=NoEscape(r'0.8\textwidth'),
+        booktabs=True
+    )
+    # tabular.append(Command('small'))
+    tabular.add_hline()
+    for item in data:
+        for key, value in column2text.items():
+            cells = [bold(value), item[key]]
+            tabular.add_row(cells)
+        tabular.add_hline()
+    return tabular
+
+
+def wrap_in_table(tabular_path, dataset, model):
+    table = Table(position='H')
+    model = normalize_name('model', model)
+    dataset = normalize_name('dataset', dataset)
+    table.append(Command('small'))
+    table.append(Command('centering'))
+    table.add_caption(f'{model} 在 {dataset} 上的取样')
+    table.append(Label(Marker(prefix='tab', del_invalid_char=False, name=f'{model}_{dataset}_sample')))
+    table.append(Command('input', arguments=str(tabular_path)))
+    return table
 
 
 def make_tabular(src_prefix: Path = None, dst_prefix: Path = None):
@@ -32,17 +54,24 @@ def make_tabular(src_prefix: Path = None, dst_prefix: Path = None):
     if dst_prefix is None:
         dst_prefix = Path('/home/cgsdfc/GraduateDesign/data/sample')
 
-    def get_output(path: Path):
+    def parse_url(path: Path):
         k, dataset, model, file = path.parts[-4:]
-        output = dst_prefix / dataset / model / 'tabular.tex'
-        return make_parent_dirs(output)
+        return dataset, model
 
     for src in src_prefix.rglob('*.json'):
         data = json.load(src.open())
-        tabular = PieceTabular(data)
-        output = get_output(src)
+        tabular = fill_data_in_tabular(data, 5)
+        dataset, model = parse_url(src)
+        subdir = make_parent_dirs(dst_prefix / dataset / model)
+
+        output = subdir.joinpath(TABULAR_TEX)
+        table = wrap_in_table(output, dataset, model)
         logging.info('writing tabular to {}'.format(output))
         output.write_text(tabular.dumps())
+
+        output = subdir.joinpath(TABLE_TEX)
+        logging.info('writing table to {}'.format(output))
+        output.write_text(table.dumps())
 
 
 if __name__ == '__main__':
