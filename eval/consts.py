@@ -70,3 +70,5 @@ PLOT_FILENAME = 'plot.pdf'
 TRIPLE_NAMES = ('model', 'dataset', 'metric')
 SCORE_DB_DIR = '/home/cgsdfc/Metrics/Eval/data/v2/score/db'
 DATA_V2_ROOT = '/home/cgsdfc/Metrics/Eval/data/v2'
+
+FIGURE_ROOT = '/home/cgsdfc/GraduateDesign/figure'
