@@ -4,7 +4,7 @@ Correlation heatmap of various metrics on per dataset-model.
 
 from eval.consts import PLOT_FILENAME
 from seaborn import heatmap
-from iconip.utterance import load_model_dataset2_feature, SAVE_ROOT
+from iconip.utterance import load_model_dataset2_feature, SAVE_ROOT, normailze_key
 from eval.data import seaborn_setup
 from eval.utils import make_parent_dirs
 from matplotlib.figure import Figure
@@ -12,7 +12,6 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import matplotlib.pyplot as plt
 import logging
 import seaborn as sns
-from eval.normalize import normalize_name
 
 
 def plot_heatmap():
@@ -25,11 +24,10 @@ def plot_heatmap():
         corr = value.corr()  # use pearson
         plt.gcf().subplots_adjust(bottom=0.18, right=1.0)
         heatmap(corr)
-        plt.title('Heatmap of Pearson\'s R for {} on {}'.format(*key))
+        plt.title('Heatmap of Pearson\'s R for {} on {}'.format(*normalize_key(key))
         plt.savefig(output)
         plt.close('all')
 
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
-    plot_heatmap()
+        if __name__ == '__main__':
+            logging.basicConfig(level=logging.INFO)
+            plot_heatmap()

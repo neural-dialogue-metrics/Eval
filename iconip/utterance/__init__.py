@@ -37,9 +37,7 @@ def create_model_dataset2utter_feature(score_db_index, **kwargs):
     """
     result = {}
     for key, df in score_db_index.groupby(['model', 'dataset']):
-        model = normalize_name('model', key[0])
-        dataset = normalize_name('dataset', key[1])
-        result[model, dataset] = create_utter_feature_df(df, **kwargs)
+        result[key] = create_utter_feature_df(df, **kwargs)
     return result
 
 
@@ -59,6 +57,9 @@ def load_corr_matrix(model, dataset, method):
     target = SAVE_ROOT / 'corr' / method / model / dataset / 'corr.json'
     return pd.read_json(target)
 
+
+def normailze_key(key):
+    return map(normalize_name, ['model', 'dataset'], key)
 
 if __name__ == '__main__':
     # force recomputation.
