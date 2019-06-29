@@ -1,5 +1,13 @@
+import pickle
+from pathlib import Path
 from eval.data import UtterScoreDist, load_score_db_index
 import pandas as pd
+from eval.consts import DATA_V2_ROOT
+import logging
+
+logger = logging.getLogger(__name__)
+
+SAVE_ROOT = Path(DATA_V2_ROOT) / 'iconip' / 'utterance'
 
 
 def create_utter_feature_df(score_index_per_model_dataset: pd.DataFrame, **kwargs):
@@ -12,9 +20,10 @@ def create_utter_feature_df(score_index_per_model_dataset: pd.DataFrame, **kwarg
     """
     columns = {}
     for path in score_index_per_model_dataset.filename:
-        utter = UtterScoreDist(path, **kwargs)
+        utter = UtterScoreDist(path, normalize_names=True, **kwargs)
         columns[utter.metric] = utter.utterance
-    return pd.DataFrame(columns)
+    # sort by columns names.
+    return pd.DataFrame(columns).sort_index(axis=1)
 
 
 def create_model_dataset2utter_feature(score_db_index, **kwargs):
@@ -31,6 +40,13 @@ def create_model_dataset2utter_feature(score_db_index, **kwargs):
     return result
 
 
-if __name__ == '__main__':
-    score_db_index = load_score_db_index()
-    create_model_dataset2utter_feature(score_db_index)
+def load_model_dataset2_feature(path=None):
+    cache_path = Path(DATA_V2_ROOT) / 'iconip' / 'utterace' / 'feature' / 'dataframe_map.pkl'
+    cache_path.parent.mkdir(exist_ok=True, parents=True)
+    if cache_path.is_file():
+        logging.info('loading features from cache file: {}'.format(cache_path))
+        return pickle.load(cache_path.open('rb'))
+    score_db_index = load_score_db_index(path)
+    features = create_model_dataset2utter_feature(score_db_index)
+    pickle.dump(features, cache_path.open('wb'))
+    return features

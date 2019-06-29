@@ -129,17 +129,24 @@ class Triple:
 class UtterScoreDist(Triple):
     """Utterance-Score Distribution"""
 
-    def __init__(self, filename: Path, scale=False, normalize=False):
+    def __init__(self, filename: Path, scale_values=False, normalize_names=False):
+        """
+        Create an UtterScoreDist.
+        
+        :param filename: the json file to look for data. 
+        :param scale_values: if true, the values will be scaled to have mean=0 and std=1.
+        :param normalize_names: if true, the names will be normalized.
+        """
         data = json.load(filename.open())
         super(UtterScoreDist, self).__init__(**data)
         self.system = data['system']
-        self.scaled = scale
-        self.normalized = normalize
+        self.scaled = scale_values
+        self.normalized = normalize_names
         utterance = data['utterance']
-        if scale:
+        if scale_values:
             utterance = sklearn_scale(utterance)
         self.utterance = utterance
-        if normalize:
+        if normalize_names:
             self.normalize_name_inplace()
 
 

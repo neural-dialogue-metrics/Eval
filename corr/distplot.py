@@ -35,7 +35,7 @@ def plot(df: DataFrame, prefix: Path):
         if not output.parent.is_dir():
             output.parent.mkdir(parents=True)
 
-        data = UtterScoreDist(triple.filename, scale=True, normalize=True)
+        data = UtterScoreDist(triple.filename, scale_values=True, normalize_names=True)
         do_distplot(data, output)
 
 

@@ -31,7 +31,7 @@ def do_distplot(ax, data: UtterScoreDist):
 
 def distplot_wrapper(filename: Series, **kwargs):
     filename = filename.values[0]
-    data = UtterScoreDist(filename, normalize=True, scale=True)
+    data = UtterScoreDist(filename, normalize_names=True, scale_values=True)
     sns.distplot(data.utterance, **kwargs)
     plt.title('{} on {}'.format(data.model, data.dataset))
 
