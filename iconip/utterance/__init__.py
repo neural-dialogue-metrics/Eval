@@ -55,7 +55,8 @@ def load_feature(path=None, use_cache=True):
 
 def load_corr_matrix(model, dataset, method):
     target = SAVE_ROOT / 'corr' / method / model / dataset / 'corr.json'
-    return pd.read_json(str(targetcor))
+    logger.info('loading correlation of method {} for ({}, {})'.format(method, model, dataset))
+    return pd.read_json(str(target))
 
 
 def normalize_key(key):

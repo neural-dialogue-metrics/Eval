@@ -8,11 +8,13 @@ import logging
 import matplotlib.pyplot as plt
 from eval.utils import make_parent_dirs
 
+from scipy.stats import pearsonr, spearmanr, kendalltau
 
-def plot_dendrogram():
+
+def plot_dendrogram(method):
     for key, value in load_feature().items():
         output = make_parent_dirs(
-            SAVE_ROOT / 'plot' / 'hierarchy' / key[0] / key[1] / 'plot.pdf'
+            SAVE_ROOT / 'plot' / 'hierarchy' / 'method' / key[0] / key[1] / 'plot.pdf'
         )
         logging.info('plotting to {}'.format(output))
         try:
