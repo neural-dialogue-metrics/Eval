@@ -429,6 +429,8 @@ font.family         : Times New Roman
 #figure.autolayout : False  # When True, automatically adjust subplot
                             # parameters to make the plot fit the figure
                             # using `tight_layout`
+figure.autolayout : True
+
 #figure.constrained_layout.use: False # When True, automatically make plot
                                  # elements fit on the figure. (Not compatible
                                  # with `autolayout`, above).
