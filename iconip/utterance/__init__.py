@@ -41,7 +41,7 @@ def create_model_dataset2utter_feature(score_db_index, **kwargs):
     return result
 
 
-def load_model_dataset2_feature(path=None, use_cache=True):
+def load_feature(path=None, use_cache=True):
     cache_path = SAVE_ROOT / 'feature' / 'dataframe_map.pkl'
     cache_path.parent.mkdir(exist_ok=True, parents=True)
     if cache_path.is_file() and use_cache:
@@ -55,12 +55,13 @@ def load_model_dataset2_feature(path=None, use_cache=True):
 
 def load_corr_matrix(model, dataset, method):
     target = SAVE_ROOT / 'corr' / method / model / dataset / 'corr.json'
-    return pd.read_json(target)
+    return pd.read_json(str(targetcor))
 
 
 def normailze_key(key):
     return map(normalize_name, ['model', 'dataset'], key)
 
+
 if __name__ == '__main__':
     # force recomputation.
-    load_model_dataset2_feature(use_cache=False)
+    load_feature(use_cache=False)

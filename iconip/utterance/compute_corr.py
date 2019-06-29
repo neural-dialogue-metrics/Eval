@@ -1,8 +1,8 @@
-from iconip.utterance import load_model_dataset2_feature
+from iconip.utterance import load_feature
 
 
 def compute_corr():
-    feature = load_model_dataset2_feature()
+    feature = load_feature()
     for key, value in feature.items():
         logger.info('computing {}-{}'.format(*key))
         for method in ['pearson', 'spearman', 'kendall']:

@@ -1,4 +1,4 @@
-from iconip.utterance import load_model_dataset2_feature, SAVE_ROOT, load_corr_matrix
+from iconip.utterance import load_feature, SAVE_ROOT, load_corr_matrix
 from eval.data import seaborn_setup
 from eval.consts import PLOT_FILENAME
 from eval.utils import make_parent_dirs
@@ -26,7 +26,7 @@ def patch_null_columns(df: DataFrame):
 
 def plot_clustermap():
     seaborn_setup()
-    for key, value in load_model_dataset2_feature().items():
+    for key, value in load_feature().items():
         output = make_parent_dirs(SAVE_ROOT / 'plot' / 'clustermap' / key[0] / key[1] / PLOT_FILENAME)
         if len(value) > THRESHOLD:
             logging.info('value too large: {}'.format(len(value)))
