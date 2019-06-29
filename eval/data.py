@@ -15,6 +15,13 @@ logger = logging.getLogger(__name__)
 
 
 def get_model_dataset_pairs(models=None, datasets=None):
+    """
+    Compute the product of a list of models and a list of datasets.
+
+    :param models:
+    :param datasets:
+    :return:
+    """
     from eval.repo import all_models, all_datasets
 
     if models is None:
@@ -38,9 +45,23 @@ def _remove_columns(df: DataFrame, remove: Tuple[str, str]):
 
 
 def load_system_score(prefix: Path = None,
-                      normalize_name=False,
-                      remove_random_model=False,
-                      remove_serban_ppl=False):
+                      normalize_name=True,
+                      remove_random_model=True,
+                      remove_serban_ppl=True):
+    """
+    Load the system scores for all settings from json files.
+    The returned DataFrame has the following columns:
+        - metric: the name of the metric
+        - model: the name of the model
+        - dataset: the name of the dataset
+        - system: the value of the system score.
+
+    :param prefix:
+    :param normalize_name: if true, all names are normalized as appearing in the paper: bleu_1 becomes BLEU-1.
+    :param remove_random_model: if true, all the rows of the random model is removed.
+    :param remove_serban_ppl: if true, all the rows whose metric is serban_ppl is removed.
+    :return:
+    """
     if prefix is None:
         prefix = Path(SCORE_DB_DIR)
     records = [json.load(file.open('r')) for file in prefix.rglob('*.json')]
@@ -131,6 +152,18 @@ def remove_ppl_and_random(df: DataFrame):
 
 
 def load_score_db_index(data_dir=None):
+    """
+    Load an index of the score database. The real score data are not loaded.
+    Only the (metric, model, dataset) and the path to the real data are loaded.
+    The resultant DataFrame has these columns:
+        - metric
+        - model
+        - dataset
+        - filename
+
+    :param data_dir:
+    :return:
+    """
     if data_dir is None:
         data_dir = SCORE_DB_DIR
     logger.info('loading filename data from {}'.format(data_dir))
