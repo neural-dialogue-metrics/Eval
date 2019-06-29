@@ -9,8 +9,19 @@ import logging
 import seaborn as sns
 from eval.normalize import normalize_name
 from seaborn import clustermap
+from pandas import DataFrame
+import numpy as np
 
 THRESHOLD = 1000
+
+
+def patch_null_columns(df: DataFrame):
+    for col in df.columns:
+        column = df[col]
+        if not column.any():
+            logging.warning('column {} is all zero'.format(col))
+            df[col] = 1
+    return df
 
 
 def plot_clustermap():
@@ -20,11 +31,12 @@ def plot_clustermap():
         if len(value) > THRESHOLD:
             logging.info('value too large: {}'.format(len(value)))
             value = value.sample(n=THRESHOLD)
+        # value = patch_null_columns(value)
         logging.info('plotting to {}'.format(output))
         # scale the column. cluster the column.
         try:
             g = clustermap(value, metric='correlation', vmin=-1, vmax=1, z_score=1, row_cluster=False)
-        except FloatingPointError as e:
+        except Exception as e:
             logging.warning('error: {}'.format(e))
         else:
             g.savefig(output)
