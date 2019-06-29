@@ -23,7 +23,7 @@ def plot_dendrogram():
         plt.gcf().subplots_adjust(right=0.8)
         dendrogram(Z,
                    orientation='left', leaf_label_func=lambda x: value.columns[x])
-        plt.title('Hierarchical cluster of metrics of ({}, {})'.format(
+        plt.title('Hierarchical clustering of metrics on ({}, {})'.format(
             *normalize_key(key)
         ))
         plt.savefig(output)
