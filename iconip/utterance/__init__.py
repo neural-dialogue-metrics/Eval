@@ -3,6 +3,7 @@ from pathlib import Path
 from eval.data import UtterScoreDist, load_score_db_index
 import pandas as pd
 from eval.consts import DATA_V2_ROOT
+from eval.normalize import normalize_name
 import logging
 
 logger = logging.getLogger(__name__)
@@ -36,17 +37,29 @@ def create_model_dataset2utter_feature(score_db_index, **kwargs):
     """
     result = {}
     for key, df in score_db_index.groupby(['model', 'dataset']):
-        result[key] = create_utter_feature_df(df, **kwargs)
+        model = normalize_name('model', key[0])
+        dataset = normalize_name('dataset', key[1])
+        result[model, dataset] = create_utter_feature_df(df, **kwargs)
     return result
 
 
-def load_model_dataset2_feature(path=None):
+def load_model_dataset2_feature(path=None, use_cache=True):
     cache_path = SAVE_ROOT / 'feature' / 'dataframe_map.pkl'
     cache_path.parent.mkdir(exist_ok=True, parents=True)
-    if cache_path.is_file():
+    if cache_path.is_file() and use_cache:
         logging.info('loading features from cache file: {}'.format(cache_path))
         return pickle.load(cache_path.open('rb'))
     score_db_index = load_score_db_index(path)
     features = create_model_dataset2utter_feature(score_db_index)
     pickle.dump(features, cache_path.open('wb'))
     return features
+
+
+def load_corr_matrix(model, dataset, method):
+    target = SAVE_ROOT / 'corr' / method / model / dataset / 'corr.json'
+    return pd.read_json(target)
+
+
+if __name__ == '__main__':
+    # force recomputation.
+    load_model_dataset2_feature(use_cache=False)

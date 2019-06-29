@@ -25,10 +25,7 @@ def plot_heatmap():
         corr = value.corr()  # use pearson
         plt.gcf().subplots_adjust(bottom=0.18, right=1.0)
         heatmap(corr)
-
-        model = normalize_name('model', key[0])
-        dataset = normalize_name('dataset', key[1])
-        plt.title('Heatmap of Pearson\'s R for {} on {}'.format(model, dataset))
+        plt.title('Heatmap of Pearson\'s R for {} on {}'.format(*key))
         plt.savefig(output)
         plt.close('all')
 
