@@ -41,7 +41,7 @@ def create_model_dataset2utter_feature(score_db_index, **kwargs):
 
 
 def load_model_dataset2_feature(path=None):
-    cache_path = Path(DATA_V2_ROOT) / 'iconip' / 'utterace' / 'feature' / 'dataframe_map.pkl'
+    cache_path = SAVE_ROOT / 'feature' / 'dataframe_map.pkl'
     cache_path.parent.mkdir(exist_ok=True, parents=True)
     if cache_path.is_file():
         logging.info('loading features from cache file: {}'.format(cache_path))

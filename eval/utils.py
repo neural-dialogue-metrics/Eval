@@ -103,6 +103,11 @@ def should_make(target: Path, sources: Sequence[Path]):
 
 
 def make_parent_dirs(filename: Path):
+    """
+    Make the parent dirs for a given path.
+    :param filename:
+    :return:
+    """
     parent: Path = filename.parent
     parent.mkdir(parents=True, exist_ok=True)
     return filename
