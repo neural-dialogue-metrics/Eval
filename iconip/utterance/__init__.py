@@ -53,7 +53,7 @@ def load_feature(path=None, use_cache=True):
     return features
 
 
-def load_corr_matrix(model, dataset, method):
+def load_corr_matrix(method, model, dataset):
     target = SAVE_ROOT / 'corr' / method / model / dataset / 'corr.json'
     logger.info('loading correlation of method {} for ({}, {})'.format(method, model, dataset))
     return pd.read_json(str(target))
@@ -63,6 +63,18 @@ def normalize_key(key):
     return map(normalize_name, ['model', 'dataset'], key)
 
 
+def load_all_corr():
+    root = SAVE_ROOT / 'corr'
+    files = root.rglob('*.json')
+
+    def path_to_items(path: Path):
+        key = path.parts[-4:-1]
+        return key, load_corr_matrix(*key)
+
+    return dict(map(path_to_items, files))
+
+
 if __name__ == '__main__':
     # force recomputation.
-    load_feature(use_cache=False)
+    # load_feature(use_cache=False)
+    print(load_all_corr())

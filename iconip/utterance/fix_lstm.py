@@ -31,7 +31,7 @@ def show_nan_for_method(method):
     :param method:
     :return:
     """
-    corr: pd.DataFrame = load_corr_matrix(*TEST_KEY, method)
+    corr: pd.DataFrame = load_corr_matrix(method, *TEST_KEY)
     print(corr)
 
 
