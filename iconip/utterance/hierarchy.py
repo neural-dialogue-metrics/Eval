@@ -16,7 +16,7 @@ def plot_dendrogram():
         )
         logging.info('plotting to {}'.format(output))
         try:
-            Z = linkage(value.transpose(), metric='correlation')
+            Z = linkage(value.transpose(), method='average', metric='correlation')
         except ValueError as e:
             logging.error(e)
             continue
