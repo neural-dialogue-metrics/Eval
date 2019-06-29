@@ -58,7 +58,7 @@ def load_corr_matrix(model, dataset, method):
     return pd.read_json(str(targetcor))
 
 
-def normailze_key(key):
+def normalize_key(key):
     return map(normalize_name, ['model', 'dataset'], key)
 
 

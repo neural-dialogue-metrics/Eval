@@ -3,7 +3,7 @@ Hierarchical clustering with scipy
 """
 
 from scipy.cluster.hierarchy import linkage, dendrogram
-from iconip.utterance import load_feature, SAVE_ROOT, normailze_key
+from iconip.utterance import load_feature, SAVE_ROOT, normalize_key
 import logging
 import matplotlib.pyplot as plt
 from eval.utils import make_parent_dirs
@@ -23,8 +23,8 @@ def plot_dendrogram():
         plt.gcf().subplots_adjust(right=0.8)
         dendrogram(Z,
                    orientation='left', leaf_label_func=lambda x: value.columns[x])
-        plt.title('hierarchical cluster of metrics of ({}, {})'.format(
-            *normailze_key(key)
+        plt.title('Hierarchical cluster of metrics of ({}, {})'.format(
+            *normalize_key(key)
         ))
         plt.savefig(output)
         plt.close('all')
