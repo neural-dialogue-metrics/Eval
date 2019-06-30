@@ -10,9 +10,12 @@ from scipy.cluster.hierarchy import linkage, dendrogram
 from scipy.spatial.distance import squareform
 
 from eval.utils import make_parent_dirs
-from iconip.utterance import SAVE_ROOT, load_all_corr
+from iconip.utterance import load_all_corr
+from pathlib import Path
 
 LINKAGE_METHOD = 'average'
+
+SAVE_ROOT = Path('/home/cgsdfc/ICONIP2019/figure')
 
 
 def hierarchy_with_corr(corr_matrix: pd.DataFrame):
@@ -28,7 +31,7 @@ def hierarchy_with_corr(corr_matrix: pd.DataFrame):
 def plot_dendrogram():
     for key, value in load_all_corr().items():
         output = make_parent_dirs(
-            SAVE_ROOT / 'plot' / 'hierarchy' / 'v2' / key[0] / key[1] / key[2] / 'plot.pdf'
+            SAVE_ROOT / 'plot' / 'hierarchy' / 'v2' / key[0] / key[1] / key[2] / 'plot.eps'
         )
         logging.info('plotting to {}'.format(output))
         try:
