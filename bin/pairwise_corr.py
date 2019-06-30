@@ -2,7 +2,7 @@ import argparse
 import logging
 
 from pathlib import Path
-from corr.pairwise import compute_corr_and_plot_scatter
+from graduate.pairwise import compute_corr_and_plot_scatter
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

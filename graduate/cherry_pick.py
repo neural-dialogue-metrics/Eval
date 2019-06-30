@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 import pandas as pd
-from corr.annotated import load_annotated_index, FILENAME
+from graduate.annotated import load_annotated_index, FILENAME
 from eval.consts import DATA_V2_ROOT
 from eval.utils import make_parent_dirs
 from pandas import DataFrame, Series

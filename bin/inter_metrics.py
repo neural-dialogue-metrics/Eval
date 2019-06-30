@@ -1,6 +1,6 @@
 import argparse
 import logging
-from corr.utils import inter_metric_corr, inter_metric_scatter_plot
+from graduate.utils import inter_metric_corr, inter_metric_scatter_plot
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

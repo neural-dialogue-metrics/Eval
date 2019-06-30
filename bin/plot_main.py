@@ -1,4 +1,4 @@
-from corr.utils import plot_main
+from graduate.utils import plot_main
 import sys
 
 if __name__ == '__main__':

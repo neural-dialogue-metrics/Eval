@@ -4,7 +4,7 @@ import pandas as pd
 from pandas import DataFrame
 from pathlib import Path
 
-from corr.annotated import load_annotated_index, FILENAME
+from graduate.annotated import load_annotated_index, FILENAME
 from eval.consts import DATA_V2_ROOT
 from eval.utils import make_parent_dirs
 
