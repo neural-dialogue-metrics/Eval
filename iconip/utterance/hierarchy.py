@@ -15,7 +15,7 @@ from pathlib import Path
 
 LINKAGE_METHOD = 'average'
 
-SAVE_ROOT = Path('/home/cgsdfc/ICONIP2019/figure')
+PLOT_ROOT = Path('/home/cgsdfc/ICONIP2019/figure')
 
 
 def hierarchy_with_corr(corr_matrix: pd.DataFrame):
@@ -31,7 +31,7 @@ def hierarchy_with_corr(corr_matrix: pd.DataFrame):
 def plot_dendrogram():
     for key, value in load_all_corr().items():
         output = make_parent_dirs(
-            SAVE_ROOT / 'plot' / 'hierarchy' / 'v2' / key[0] / key[1] / key[2] / 'plot.eps'
+            PLOT_ROOT / 'plot' / 'hierarchy' / 'v3' / key[0] / key[1] / key[2] / 'plot.pdf'
         )
         logging.info('plotting to {}'.format(output))
         try:
@@ -39,7 +39,7 @@ def plot_dendrogram():
         except ValueError as e:
             logging.error(e)
             continue
-        plt.savefig(output)
+        plt.savefig(output, bbox_inches='tight')
         plt.close('all')
 
 
