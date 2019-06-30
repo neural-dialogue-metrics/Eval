@@ -23,8 +23,6 @@ def plot_heatmap():
         # Plotting logic.
         plt.gcf().subplots_adjust(bottom=0.18, right=1.0)
         heatmap(corr, center=0)
-        plt.title('{} Correlation of Metrics on ({}, {})'.format(method.capitalize(),
-                                                                 *normalize_key((model, dataset))))
         plt.savefig(output)
         plt.close('all')
 
