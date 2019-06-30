@@ -1,4 +1,7 @@
-from iconip.utterance import load_feature, load_corr_matrix
+"""
+Temp script used to fix the LSTM problems.
+"""
+from iconip.utterance import load_all_scores, load_corr_matrix
 import pandas as pd
 import logging
 from scipy.spatial.distance import pdist, squareform
@@ -12,7 +15,7 @@ pd.set_option('display.max_columns', 100)
 
 
 def load_and_print():
-    test_value = load_feature()[TEST_KEY]
+    test_value = load_all_scores()[TEST_KEY]
     print(test_value)
 
 
@@ -48,6 +51,7 @@ def linkage_precomputed_corr():
     We make $dist = 1 - corr$.
     See this post:
     https://stackoverflow.com/questions/38070478/how-to-do-clustering-using-the-matrix-of-correlation-coefficients
+
     :return:
     """
 

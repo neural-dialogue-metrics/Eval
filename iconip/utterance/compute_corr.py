@@ -1,12 +1,14 @@
 """
 Compute inter-metric correlation on example-level and serialize the data.
 
+The data is then analyzed and visualized in various ways. See `corr_heatmap.py` and other scripts.
+
 Methods are:
     - Pearson's r
     - Spearman's r
     - Kendall's tau
 """
-from iconip.utterance import load_feature, SAVE_ROOT
+from iconip.utterance import load_all_scores, SAVE_ROOT
 from eval.utils import make_parent_dirs
 import logging
 
@@ -19,7 +21,7 @@ def compute_corr():
 
     :return:
     """
-    for key, value in load_feature().items():
+    for key, value in load_all_scores().items():
         for method in ['pearson', 'spearman', 'kendall']:
             logger.info('computing ({}, {}, {})'.format(method, *key))
             output = make_parent_dirs(
