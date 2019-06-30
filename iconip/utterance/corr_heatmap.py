@@ -21,21 +21,23 @@ cmap = sns.diverging_palette(240, 10, as_cmap=True)
 def plot_heatmap():
     sns.set(font_scale=0.9, style='white', font='Times New Roman')
     for (method, model, dataset), corr in load_all_corr().items():
-        output = PLOT_ROOT / 'plot' / 'heatmap' / 'v3' / method / model / dataset / PLOT_FILENAME
+        output = PLOT_ROOT / 'plot' / 'heatmap' / 'v4' / method / model / dataset / PLOT_FILENAME
         logging.info('plotting to {}'.format(output))
         output = make_parent_dirs(output)
 
         # Plotting logic.
+        plt.tight_layout(pad=0)
         plt.gcf().subplots_adjust(bottom=0.18, right=1.0)
         mask = np.zeros_like(corr, dtype=np.bool)
         mask[np.triu_indices_from(mask)] = True
-        heatmap(
+        ax = heatmap(
             corr, center=0, cmap=cmap, vmax=1, vmin=-1,
-            square=True, linewidth=0.5, mask=mask,
+            square=True, linewidth=0.5,
             cbar_kws={
                 'shrink': 0.5
             })
-        plt.savefig(output)
+        ax.set_aspect('equal')
+        plt.savefig(output, bbox_inches='tight')
         plt.close('all')
 
 
