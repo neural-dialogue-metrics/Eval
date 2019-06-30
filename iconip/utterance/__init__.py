@@ -5,6 +5,7 @@ import pandas as pd
 from eval.consts import DATA_V2_ROOT
 from eval.normalize import normalize_name
 import logging
+from eval.utils import make_parent_dirs
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,7 @@ def create_model_dataset2utter_feature(score_db_index, **kwargs):
 
 def load_feature(path=None, use_cache=True):
     cache_path = SAVE_ROOT / 'feature' / 'dataframe_map.pkl'
-    cache_path.parent.mkdir(exist_ok=True, parents=True)
+    make_parent_dirs(cache_path)
     if cache_path.is_file() and use_cache:
         logging.info('loading features from cache file: {}'.format(cache_path))
         return pickle.load(cache_path.open('rb'))
@@ -64,6 +65,10 @@ def normalize_key(key):
 
 
 def load_all_corr():
+    cache_path = SAVE_ROOT / 'corr' / 'all' / 'cache.pkl'
+    if cache_path.is_file():
+        return pickle.load(cache_path.open('rb'))
+
     root = SAVE_ROOT / 'corr'
     files = root.rglob('*.json')
 
@@ -71,7 +76,10 @@ def load_all_corr():
         key = path.parts[-4:-1]
         return key, load_corr_matrix(*key)
 
-    return dict(map(path_to_items, files))
+    all_corr = dict(map(path_to_items, files))
+    make_parent_dirs(cache_path)
+    pickle.dump(all_corr, cache_path.open('wb'))
+    return all_corr
 
 
 if __name__ == '__main__':

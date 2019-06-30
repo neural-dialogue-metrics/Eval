@@ -2,32 +2,40 @@
 Hierarchical clustering with scipy
 """
 
-from scipy.cluster.hierarchy import linkage, dendrogram
-from iconip.utterance import load_feature, SAVE_ROOT, normalize_key
 import logging
+
 import matplotlib.pyplot as plt
+import pandas as pd
+from scipy.cluster.hierarchy import linkage, dendrogram
+from scipy.spatial.distance import squareform
+
 from eval.utils import make_parent_dirs
+from iconip.utterance import SAVE_ROOT, load_all_corr
 
-from scipy.stats import pearsonr, spearmanr, kendalltau
+LINKAGE_METHOD = 'average'
 
 
-def plot_dendrogram(method):
-    for key, value in load_feature().items():
+def hierarchy_with_corr(corr_matrix: pd.DataFrame):
+    # Note DataFrame can be converted to array.
+    condensed = squareform(corr_matrix, checks=False, force='tovector')
+    condensed = 1 - condensed
+    Z = linkage(condensed, method=LINKAGE_METHOD, optimal_ordering=True)
+    # Make room for the leaves label.
+    plt.gcf().subplots_adjust(right=0.8)
+    dendrogram(Z, orientation='left', leaf_label_func=lambda x: corr_matrix.columns[x])
+
+
+def plot_dendrogram():
+    for key, value in load_all_corr().items():
         output = make_parent_dirs(
-            SAVE_ROOT / 'plot' / 'hierarchy' / 'method' / key[0] / key[1] / 'plot.pdf'
+            SAVE_ROOT / 'plot' / 'hierarchy' / 'v2' / key[0] / key[1] / key[2] / 'plot.pdf'
         )
         logging.info('plotting to {}'.format(output))
         try:
-            Z = linkage(value.transpose(), method='average', metric='correlation')
+            hierarchy_with_corr(value)
         except ValueError as e:
             logging.error(e)
             continue
-        plt.gcf().subplots_adjust(right=0.8)
-        dendrogram(Z,
-                   orientation='left', leaf_label_func=lambda x: value.columns[x])
-        plt.title('Hierarchical clustering of metrics on ({}, {})'.format(
-            *normalize_key(key)
-        ))
         plt.savefig(output)
         plt.close('all')
 
