@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 
 SAVE_ROOT = Path(DATA_V2_ROOT) / 'iconip' / 'utterance'
 
+PLOT_ROOT = Path('/home/cgsdfc/ICONIP2019/figure')
+
 
 def create_utter_feature_df(score_index_per_model_dataset: pd.DataFrame, **kwargs):
     """
