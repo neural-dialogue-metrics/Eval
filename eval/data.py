@@ -84,28 +84,6 @@ def scale_and_sample(frame: pd.DataFrame):
     return frame.sample(n=SAMPLE_SIZE, random_state=RANDOM_STATE).transform(sklearn_scale)
 
 
-class DataIndex:
-
-    def __init__(self, data_dir):
-        self.data_dir = Path(data_dir).absolute()
-        self._index = None
-        self._cache = {}
-
-    @property
-    def index(self):
-        if self._index is None:
-            self._index = load_score_db_index(self.data_dir)
-        return self._index
-
-    def iter_triples(self):
-        return self.index.itertuples(index=False, name='Triple')
-
-    def get_data(self, path, **kwargs):
-        if path in self._cache:
-            return self._cache[path]
-        return self._cache.setdefault(path, UtterScoreDist(path, **kwargs))
-
-
 class Triple:
     def __init__(self, model, dataset, metric, **kwargs):
         self.model = model
