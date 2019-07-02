@@ -52,6 +52,13 @@ def compute():
                 logging.warning(e)
 
 
+THESHOLD = 0.05
+
+
+def find_high_value(method='pearson'):
+    files = (SAVE_ROOT / 'pvalue').rglob('{}/**/data.json'.format(method))
+
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     compute()
