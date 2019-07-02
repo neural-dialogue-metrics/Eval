@@ -5,6 +5,7 @@ The smaller the p-value, the higher the significance.
 """
 import logging
 import json
+import pandas
 import pickle
 from itertools import combinations, product
 from collections import defaultdict
@@ -35,6 +36,10 @@ def compute_pvalue(scores: DataFrame, method):
     return items
 
 
+def get_output(method_name, *key):
+    return make_parent_dirs(SAVE_ROOT / 'pvalue' / method_name / key[0] / key[1] / 'data.json')
+
+
 def compute():
     method_dict = {
         'pearson': pearsonr,
@@ -43,7 +48,7 @@ def compute():
     }
     for key, value in load_all_scores().items():
         for method_name, method in method_dict.items():
-            output = make_parent_dirs(SAVE_ROOT / 'pvalue' / method_name / key[0] / key[1] / 'data.json')
+            output = get_output(method_name, *key)
             logging.info('computing pvalue for {}, method={}'.format(key, method_name))
             try:
                 pvalue = compute_pvalue(value, method)
@@ -53,6 +58,20 @@ def compute():
 
 
 THESHOLD = 0.05
+
+
+# The format we created in compute_pvalue() is just ok for pd.read_json().
+def load_pvalue_for(method, model, dataset):
+    """
+    Load the p-value for the specific args.
+
+    :param method:
+    :param model:
+    :param dataset:
+    :return:
+    """
+    output = get_output(method, model, dataset)
+    return pandas.read_json(output)
 
 
 def find_high_value(method='pearson'):

@@ -8,6 +8,7 @@ Methods are:
     - Spearman's r
     - Kendall's tau
 """
+from iconip import CORR_METHODS
 from iconip.utterance import load_all_scores, SAVE_ROOT
 from eval.utils import make_parent_dirs
 import logging
@@ -22,7 +23,7 @@ def compute_corr():
     :return:
     """
     for key, value in load_all_scores().items():
-        for method in ['pearson', 'spearman', 'kendall']:
+        for method in CORR_METHODS:
             logger.info('computing ({}, {}, {})'.format(method, *key))
             output = make_parent_dirs(
                 SAVE_ROOT / 'corr' / method / key[0] / key[1] / 'corr.json'
