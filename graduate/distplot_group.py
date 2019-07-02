@@ -3,14 +3,15 @@ import re
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-from graduate.distplot_grid import distplot_wrapper
+from pandas import DataFrame
+from seaborn import FacetGrid
+
 from eval.consts import PLOT_FILENAME, DATA_V2_ROOT
 from eval.data import load_score_db_index, seaborn_setup, get_schema_name
 from eval.group import get_col_wrap, MetricGroup, contains, re_match
 from eval.normalize import normalize_names_in_df
 from eval.utils import make_parent_dirs
-from pandas import DataFrame
-from seaborn import FacetGrid
+from graduate.distplot_grid import distplot_wrapper
 
 NAME = get_schema_name(__file__)
 

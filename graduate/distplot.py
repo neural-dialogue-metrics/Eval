@@ -2,11 +2,12 @@ import logging
 from pathlib import Path
 
 import seaborn as sns
-from eval.consts import PLOT_FILENAME, DATA_V2_ROOT
-from eval.data import UtterScoreDist, load_score_db_index, seaborn_setup
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 from pandas import DataFrame
+
+from eval.consts import PLOT_FILENAME, DATA_V2_ROOT
+from eval.data import UtterScoreDist, load_score_db_index, seaborn_setup
 
 NAME = 'distplot'
 

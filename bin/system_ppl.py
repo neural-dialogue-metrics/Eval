@@ -17,7 +17,7 @@ if __name__ == '__main__':
     logging.info('Found PPL score files:\n{}'.format(pp.pformat(files)))
 
     for file in files:
-        score_dist = UtterScoreDist.from_json_file(file)
+        score_dist = UtterScoreDist(file)
         print(f"""
         Model: {score_dist.model}
         Dataset: {score_dist.dataset}

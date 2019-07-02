@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-from eval.data import DataIndex, remake_needed
 from eval.consts import MODE_MODEL, MODE_METRIC, PLOT_FILENAME
+from eval.data import DataIndex, remake_needed
 
 # Outdated scripts
 NAME = 'pairplot'

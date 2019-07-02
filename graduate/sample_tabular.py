@@ -2,10 +2,11 @@ import json
 import logging
 from pathlib import Path
 
-from eval.utils import make_parent_dirs
-from pylatex import Tabularx, Table, Label, Marker, Command, LongTabularx
+from pylatex import Table, Label, Marker, Command, LongTabularx
 from pylatex.utils import bold, NoEscape
+
 from eval.normalize import normalize_name
+from eval.utils import make_parent_dirs
 
 column2text = {
     'context': '消息：',

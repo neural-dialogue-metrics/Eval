@@ -7,8 +7,8 @@ from pandas import DataFrame, Series
 from seaborn import FacetGrid
 
 from eval.consts import PLOT_FILENAME
-from eval.normalize import normalize_names_in_df
 from eval.data import UtterScoreDist, load_score_db_index
+from eval.normalize import normalize_names_in_df
 
 NAME = 'distplot_grid'
 

@@ -1,12 +1,12 @@
 import logging
+from pathlib import Path
 
 import pandas as pd
 from pandas import DataFrame
-from pathlib import Path
 
-from graduate.annotated import load_annotated_index, FILENAME
 from eval.consts import DATA_V2_ROOT
 from eval.utils import make_parent_dirs
+from graduate.annotated import load_annotated_index, FILENAME
 
 __version__ = '0.0.1'
 

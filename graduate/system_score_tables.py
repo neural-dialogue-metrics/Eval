@@ -1,14 +1,14 @@
+import logging
 import shutil
 from itertools import product
 from pathlib import Path
-import logging
-
-from pylatex.utils import bold
 
 from pandas import DataFrame
 from pylatex import Tabular, Table, Command, Label, Marker, MultiColumn, TableRowSizeError
-from eval.normalize import normalize_name
+from pylatex.utils import bold
+
 from eval.data import load_system_score, UtterScoreDist, find_all_data_files
+from eval.normalize import normalize_name
 
 __version__ = '0.0.1'
 

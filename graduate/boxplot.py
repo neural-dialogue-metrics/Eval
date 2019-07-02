@@ -10,10 +10,10 @@ distributions of system scores along the model and the dataset dimensions, respe
 Note a boxplot is also uniquely identified by a metric like a barplot.
 """
 import logging
-import seaborn as sns
-import matplotlib.pyplot as plt
-
 from pathlib import Path
+
+import matplotlib.pyplot as plt
+import seaborn as sns
 from pandas import DataFrame
 
 from eval.consts import PLOT_FILENAME, FIGURE_ROOT
